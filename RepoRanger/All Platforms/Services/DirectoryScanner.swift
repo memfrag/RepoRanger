@@ -47,7 +47,8 @@ enum DirectoryScanner {
                     name: name,
                     kind: .xcodeProject,
                     url: url,
-                    readmeURL: readmeURL
+                    readmeURL: readmeURL,
+                    parentName: projectDir.lastPathComponent
                 ))
                 xcodeProjectDirs.insert(projectDir.path(percentEncoded: false))
                 enumerator.skipDescendants()
@@ -59,7 +60,8 @@ enum DirectoryScanner {
                     name: name,
                     kind: .swiftPackage,
                     url: packageDir,
-                    readmeURL: readmeURL
+                    readmeURL: readmeURL,
+                    parentName: packageDir.deletingLastPathComponent().lastPathComponent
                 ))
                 enumerator.skipDescendants()
             }

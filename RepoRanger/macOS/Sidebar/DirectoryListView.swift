@@ -8,6 +8,7 @@ struct DirectoryListView: View {
 
     @Bindable var settings: AppSettings
     @Binding var selection: MonitoredDirectory?
+    var projectCounts: [UUID: Int]
     var addSection: () -> Void
 
     @State private var renamingSection: SidebarSection?
@@ -44,8 +45,21 @@ struct DirectoryListView: View {
     private func sectionView(for section: SidebarSection) -> some View {
         Section {
             ForEach(directoriesIn(section)) { directory in
-                Label(directory.displayName, systemImage: "folder")
-                    .tag(directory)
+                HStack {
+                    Label {
+                        Text(directory.displayName)
+                    } icon: {
+                        Image(systemName: "folder.fill")
+                            .foregroundStyle(.blue)
+                    }
+                    Spacer()
+                    if let count = projectCounts[directory.id], count > 0 {
+                        Text("\(count)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .tag(directory)
                     .contextMenu {
                         Button("Reveal in Finder") {
                             if let url = directory.resolveURL() {
@@ -90,6 +104,7 @@ struct DirectoryListView: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.tertiary)
+                .padding(.trailing, 6)
             }
             .contextMenu {
                 Button("Add Directory") {

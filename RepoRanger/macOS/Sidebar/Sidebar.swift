@@ -22,6 +22,7 @@ struct Sidebar: View {
             DirectoryListView(
                 settings: settings,
                 selection: $selectedDirectory,
+                projectCounts: projectsByDirectory.mapValues(\.count),
                 addSection: { isAddingSectionAlertPresented = true }
             )
             .navigationTitle("Directories")

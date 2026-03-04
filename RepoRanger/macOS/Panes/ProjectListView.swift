@@ -12,6 +12,12 @@ struct ProjectListView: View {
 
     @State private var isXcodeProjectsExpanded = true
     @State private var isSwiftPackagesExpanded = true
+    @State private var searchText = ""
+
+    private var filteredProjects: [DiscoveredProject] {
+        if searchText.isEmpty { return projects }
+        return projects.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
 
     var body: some View {
         Group {
@@ -26,15 +32,13 @@ struct ProjectListView: View {
                 )
             } else {
                 List(selection: $selection) {
-                    let xcodeProjects = projects.filter { $0.kind == .xcodeProject }
-                    let swiftPackages = projects.filter { $0.kind == .swiftPackage }
+                    let xcodeProjects = filteredProjects.filter { $0.kind == .xcodeProject }
+                    let swiftPackages = filteredProjects.filter { $0.kind == .swiftPackage }
 
                     if !xcodeProjects.isEmpty {
                         Section("Xcode Projects", isExpanded: $isXcodeProjectsExpanded) {
                             ForEach(xcodeProjects) { project in
-                                Label(project.name, systemImage: project.systemImage)
-                                    .tag(project)
-                                    .contextMenu { projectContextMenu(for: project) }
+                                projectRow(project)
                             }
                         }
                     }
@@ -42,15 +46,49 @@ struct ProjectListView: View {
                     if !swiftPackages.isEmpty {
                         Section("Swift Packages", isExpanded: $isSwiftPackagesExpanded) {
                             ForEach(swiftPackages) { project in
-                                Label(project.name, systemImage: project.systemImage)
-                                    .tag(project)
-                                    .contextMenu { projectContextMenu(for: project) }
+                                projectRow(project)
                             }
                         }
                     }
                 }
                 .listStyle(.sidebar)
+                .searchable(text: $searchText, placement: .sidebar, prompt: "Filter")
             }
+        }
+    }
+
+    private func projectRow(_ project: DiscoveredProject) -> some View {
+        HStack(spacing: 6) {
+            projectIcon(for: project)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(project.name)
+                    .lineLimit(1)
+                Text(project.parentName)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+        }
+        .tag(project)
+        .contextMenu { projectContextMenu(for: project) }
+    }
+
+    @ViewBuilder
+    private func projectIcon(for project: DiscoveredProject) -> some View {
+        switch project.kind {
+        case .xcodeProject:
+            Image(systemName: "hammer.fill")
+                .font(.system(size: 7))
+                .foregroundStyle(.black)
+                .frame(width: 14, height: 14)
+                .offset(x: 0.5, y: -0.5)
+                .background(
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(.blue)
+                )
+        case .swiftPackage:
+            Image(systemName: "shippingbox.fill")
+                .foregroundStyle(project.iconColor)
         }
     }
 

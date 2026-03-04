@@ -20,6 +20,7 @@ struct ReadmeDetailView: View {
                         .markdownStyle(MarkdownStyle())
                         .tint(.blue)
                         .padding()
+                        .padding(.horizontal)
                         .textSelection(.enabled)
                 }
             } else if loadError {
