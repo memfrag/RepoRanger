@@ -50,7 +50,7 @@ struct DirectoryListView: View {
                         Text(directory.displayName)
                     } icon: {
                         Image(systemName: "folder.fill")
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(selection?.id == directory.id ? .white : .blue)
                     }
                     Spacer()
                     if let count = projectCounts[directory.id], count > 0 {

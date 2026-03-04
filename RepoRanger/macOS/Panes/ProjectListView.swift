@@ -57,9 +57,14 @@ struct ProjectListView: View {
         }
     }
 
+    private var isSelected: (DiscoveredProject) -> Bool {
+        { project in selection?.id == project.id }
+    }
+
     private func projectRow(_ project: DiscoveredProject) -> some View {
-        HStack(spacing: 6) {
-            projectIcon(for: project)
+        let selected = isSelected(project)
+        return HStack(spacing: 6) {
+            projectIcon(for: project, selected: selected)
             VStack(alignment: .leading, spacing: 1) {
                 Text(project.name)
                     .lineLimit(1)
@@ -74,21 +79,21 @@ struct ProjectListView: View {
     }
 
     @ViewBuilder
-    private func projectIcon(for project: DiscoveredProject) -> some View {
+    private func projectIcon(for project: DiscoveredProject, selected: Bool) -> some View {
         switch project.kind {
         case .xcodeProject:
             Image(systemName: "hammer.fill")
                 .font(.system(size: 7))
-                .foregroundStyle(.black)
+                .foregroundStyle(selected ? .white : .black)
                 .frame(width: 14, height: 14)
                 .offset(x: 0.5, y: -0.5)
                 .background(
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(.blue)
+                        .fill(selected ? .white.opacity(0.3) : .blue)
                 )
         case .swiftPackage:
             Image(systemName: "shippingbox.fill")
-                .foregroundStyle(project.iconColor)
+                .foregroundStyle(selected ? .white : project.iconColor)
         }
     }
 
