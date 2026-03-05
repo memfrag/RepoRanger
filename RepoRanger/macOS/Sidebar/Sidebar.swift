@@ -14,6 +14,10 @@ struct Sidebar: View {
     @State private var isScanning: Bool = false
     @State private var accessedURLs: [URL] = []
 
+    @State private var history: [DiscoveredProject] = []
+    @State private var historyIndex: Int = -1
+    @State private var isNavigating = false
+
     @State private var isAddingSectionAlertPresented = false
     @State private var newSectionName = ""
 
@@ -28,13 +32,23 @@ struct Sidebar: View {
                 addSection: { isAddingSectionAlertPresented = true }
             )
             .navigationTitle("Directories")
-            .frame(minWidth: 180, idealWidth: 200, maxWidth: 300)
+            .frame(minWidth: 200, idealWidth: 200, maxWidth: 300)
             .alert("New Section", isPresented: $isAddingSectionAlertPresented) {
                 TextField("Section Name", text: $newSectionName)
                 Button("Cancel", role: .cancel) { newSectionName = "" }
                 Button("Add") {
                     addSection(name: newSectionName)
                     newSectionName = ""
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        Task { await scanAllDirectories() }
+                    } label: {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                    }
+                    .disabled(settings.monitoredDirectories.isEmpty || isScanning)
                 }
             }
         } content: {
@@ -46,22 +60,41 @@ struct Sidebar: View {
             )
             .navigationTitle(selectedDirectory?.displayName ?? "Projects")
             .frame(minWidth: 200, idealWidth: 250)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        Task { await scanAllDirectories() }
-                    } label: {
-                        Label("Refresh", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(settings.monitoredDirectories.isEmpty || isScanning)
-                }
-            }
         } detail: {
             if let selectedProject {
                 ReadmeDetailView(settings: settings, project: selectedProject)
+                    .toolbar {
+                        ToolbarItem(placement: .navigation) {
+                            HStack(spacing: 0) {
+                                Button {
+                                    goBack()
+                                } label: {
+                                    Label("Back", systemImage: "chevron.left")
+                                }
+                                .disabled(!canGoBack)
+                                Button {
+                                    goForward()
+                                } label: {
+                                    Label("Forward", systemImage: "chevron.right")
+                                }
+                                .disabled(!canGoForward)
+                            }
+                        }
+                    }
             } else {
                 EmptyPane()
             }
+        }
+        .onChange(of: selectedProject) {
+            guard !isNavigating else { return }
+            guard let project = selectedProject else { return }
+            if historyIndex >= 0, historyIndex < history.count,
+               history[historyIndex].stablePath == project.stablePath {
+                return
+            }
+            history.removeSubrange((historyIndex + 1)...)
+            history.append(project)
+            historyIndex = history.count - 1
         }
         .onChange(of: selectedDirectory) {
             // Don't clear if the selected project belongs to the newly selected directory
@@ -95,6 +128,30 @@ struct Sidebar: View {
             url.stopAccessingSecurityScopedResource()
         }
         accessedURLs = []
+    }
+
+    private var canGoBack: Bool {
+        historyIndex > 0
+    }
+
+    private var canGoForward: Bool {
+        historyIndex < history.count - 1
+    }
+
+    private func goBack() {
+        guard canGoBack else { return }
+        isNavigating = true
+        historyIndex -= 1
+        selectedProject = history[historyIndex]
+        isNavigating = false
+    }
+
+    private func goForward() {
+        guard canGoForward else { return }
+        isNavigating = true
+        historyIndex += 1
+        selectedProject = history[historyIndex]
+        isNavigating = false
     }
 
     private var allProjects: [DiscoveredProject] {

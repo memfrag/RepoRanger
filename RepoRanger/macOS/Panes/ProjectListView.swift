@@ -62,9 +62,15 @@ struct ProjectListView: View {
                         }
                     }
                     .listStyle(.sidebar)
-                    .searchable(text: $searchText, placement: .sidebar, prompt: "Filter")
-                    .toolbar {
-                        ToolbarItem(placement: .automatic) {
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                            TextField("Filter", text: $searchText)
+                                .textFieldStyle(.roundedBorder)
+                                .font(.caption)
+
                             Menu {
                                 Button {
                                     settings.projectSortOrder = .alphabetical
@@ -85,9 +91,13 @@ struct ProjectListView: View {
                                     }
                                 }
                             } label: {
-                                Label("Sort Order", systemImage: "arrow.up.arrow.down")
+                                Image(systemName: "arrow.up.arrow.down")
                             }
+                            .buttonStyle(.plain)
                         }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 8)
+                        .background(Material.ultraThin)
                     }
                     .onChange(of: selection) {
                         if let selection {
@@ -180,6 +190,15 @@ struct ProjectListView: View {
             }
             let xcodeURL = URL(filePath: "/Applications/Xcode.app")
             NSWorkspace.shared.open([url], withApplicationAt: xcodeURL, configuration: NSWorkspace.OpenConfiguration())
+        }
+        Divider()
+        Button("Copy Path", systemImage: "doc.on.doc") {
+            let directory = switch project.kind {
+            case .xcodeProject: project.url.deletingLastPathComponent()
+            case .swiftPackage: project.url
+            }
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(directory.path(percentEncoded: false), forType: .string)
         }
     }
 }

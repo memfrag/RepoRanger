@@ -59,6 +59,7 @@ struct ReadmeDetailView: View {
         }
         .navigationTitle(project.name)
         .toolbar {
+            ToolbarSpacer(.flexible)
             ToolbarItem(placement: .automatic) {
                 Button {
                     toggleFavorite()
@@ -70,6 +71,30 @@ struct ReadmeDetailView: View {
                 }
                 .foregroundStyle(isFavorite ? .yellow : .secondary)
             }
+            .sharedBackgroundVisibility(.hidden)
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    browseOnGitHub()
+                } label: {
+                    Label {
+                        Text("Browse on GitHub")
+                    } icon: {
+                        Image(.github)
+                            .resizable()
+                            .frame(width: 18, height: 18)
+                            .padding(4)
+                    }
+                }
+            }
+            .sharedBackgroundVisibility(.hidden)
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    openInSourceTree()
+                } label: {
+                    Label("Open in SourceTree", image: .branch)
+                }
+            }
+            .sharedBackgroundVisibility(.hidden)
             ToolbarItem(placement: .automatic) {
                 Button {
                     revealInFinder()
@@ -77,13 +102,21 @@ struct ReadmeDetailView: View {
                     Label("Reveal in Finder", systemImage: "folder")
                 }
             }
+            .sharedBackgroundVisibility(.hidden)
             ToolbarItem(placement: .automatic) {
                 Button {
                     openInXcode()
                 } label: {
-                    Label("Open in Xcode", systemImage: "hammer.fill")
+                    Label {
+                        Text("Open in Xcode")
+                    } icon: {
+                        Image(.xcode32)
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                    }
                 }
             }
+            .sharedBackgroundVisibility(.hidden)
         }
         .task(id: project.id) {
             async let readmeTask: Void = loadReadme()
@@ -106,12 +139,61 @@ struct ReadmeDetailView: View {
         }
     }
 
+    private func browseOnGitHub() {
+        let directory = switch project.kind {
+        case .xcodeProject: project.url.deletingLastPathComponent()
+        case .swiftPackage: project.url
+        }
+        let configURL = directory.appendingPathComponent(".git/config")
+        guard let contents = try? String(contentsOf: configURL, encoding: .utf8) else { return }
+        var inOrigin = false
+        var remoteURL: String?
+        for line in contents.components(separatedBy: .newlines) {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("[") {
+                inOrigin = trimmed == "[remote \"origin\"]"
+                continue
+            }
+            if inOrigin, trimmed.hasPrefix("url") {
+                let parts = trimmed.split(separator: "=", maxSplits: 1)
+                if parts.count == 2 {
+                    remoteURL = parts[1].trimmingCharacters(in: .whitespaces)
+                }
+                break
+            }
+        }
+        guard var urlString = remoteURL, !urlString.isEmpty else { return }
+        if urlString.hasPrefix("git@") {
+            // git@github.com:user/repo.git → https://github.com/user/repo.git
+            urlString.replace(/^git@([^:]+):/) { match in
+                "https://\(match.1)/"
+            }
+        }
+        if urlString.hasSuffix(".git") {
+            urlString = String(urlString.dropLast(4))
+        }
+        if let url = URL(string: urlString) {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
     private func revealInFinder() {
         let directory = switch project.kind {
         case .xcodeProject: project.url.deletingLastPathComponent()
         case .swiftPackage: project.url
         }
         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path(percentEncoded: false))
+    }
+
+    private func openInSourceTree() {
+        let directory = switch project.kind {
+        case .xcodeProject: project.url.deletingLastPathComponent()
+        case .swiftPackage: project.url
+        }
+        let process = Process()
+        process.executableURL = URL(filePath: "/usr/bin/env")
+        process.arguments = ["/Applications/SourceTree.app/Contents/Resources/stree", directory.path(percentEncoded: false)]
+        try? process.run()
     }
 
     private func openInXcode() {
