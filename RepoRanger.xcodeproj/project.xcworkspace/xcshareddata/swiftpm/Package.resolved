@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apparata/SettingsUI.git",
       "state" : {
-        "revision" : "3185b825d5f27c794ac9f81a0fc1d84171c92dd8",
-        "version" : "1.1.4"
+        "revision" : "eac82380515065d306926ad28fd54d2acc759b0f",
+        "version" : "1.1.5"
       }
     },
     {
