@@ -23,6 +23,7 @@ xcodebuild archive \
     -archivePath "$ARCHIVE_PATH" \
     -configuration Release \
     -arch arm64 \
+    ENABLE_HARDENED_RUNTIME=YES \
     | tail -1
 
 echo "==> Exporting..."
@@ -38,10 +39,16 @@ echo "==> Verifying codesign..."
 codesign --verify --deep --strict "$APP_PATH"
 echo "Codesign OK."
 
+echo "==> Zipping for notarization..."
+NOTARIZE_ZIP="$BUILD_DIR/$APP_NAME-notarize.zip"
+ditto -c -k --keepParent "$APP_PATH" "$NOTARIZE_ZIP"
+
 echo "==> Submitting for notarization..."
-xcrun notarytool submit "$APP_PATH" \
+xcrun notarytool submit "$NOTARIZE_ZIP" \
     --keychain-profile "$KEYCHAIN_PROFILE" \
-    --wait
+    --wait || { echo "Notarization failed. Run: xcrun notarytool log <submission-id> --keychain-profile $KEYCHAIN_PROFILE"; exit 1; }
+
+rm "$NOTARIZE_ZIP"
 
 echo "==> Stapling..."
 xcrun stapler staple "$APP_PATH"

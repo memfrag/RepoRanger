@@ -31,6 +31,7 @@ extension View {
             .environment(appEnvironment.engineeringMode)
     }
 
+    #if DEBUG
     func previewEnvironment() -> some View {
         let appEnvironment = AppEnvironment.mock()
         return self
@@ -38,4 +39,5 @@ extension View {
             .environment(appEnvironment.authService)
             .environment(appEnvironment.engineeringMode)
     }
+    #endif
 }

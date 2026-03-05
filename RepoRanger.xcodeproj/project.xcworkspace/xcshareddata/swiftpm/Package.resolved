@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apparata/BinaryDataKit.git",
       "state" : {
-        "revision" : "e4c6a45f0951a78ab0bce6c0d1736a1d16aad887",
-        "version" : "1.0.6"
+        "revision" : "4b0c0ecdf7d0ba42be863c7ae0fdeca6408e3342",
+        "version" : "1.0.7"
       }
     },
     {
