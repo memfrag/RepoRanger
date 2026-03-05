@@ -11,8 +11,6 @@ BUILD_DIR="$PROJECT_DIR/build"
 ARCHIVE_PATH="$BUILD_DIR/$APP_NAME.xcarchive"
 EXPORT_DIR="$BUILD_DIR/export"
 EXPORT_OPTIONS="$SCRIPT_DIR/ExportOptions.plist"
-ZIP_PATH="$BUILD_DIR/$APP_NAME.zip"
-
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
@@ -34,6 +32,8 @@ xcodebuild -exportArchive \
     | tail -1
 
 APP_PATH="$EXPORT_DIR/$APP_NAME.app"
+VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$APP_PATH/Contents/Info.plist")
+ZIP_PATH="$BUILD_DIR/$APP_NAME-$VERSION.zip"
 
 echo "==> Verifying codesign..."
 codesign --verify --deep --strict "$APP_PATH"
