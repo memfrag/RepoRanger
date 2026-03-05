@@ -6,6 +6,7 @@ import SwiftUI
 
 struct ProjectListView: View {
 
+    @Bindable var settings: AppSettings
     let projects: [DiscoveredProject]
     let isScanning: Bool
     @Binding var selection: DiscoveredProject?
@@ -15,8 +16,15 @@ struct ProjectListView: View {
     @State private var searchText = ""
 
     private var filteredProjects: [DiscoveredProject] {
-        if searchText.isEmpty { return projects }
-        return projects.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        let base = searchText.isEmpty ? projects : projects.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        switch settings.projectSortOrder {
+        case .alphabetical:
+            return base
+        case .recentlyChanged:
+            return base.sorted { a, b in
+                (lastModifiedDate(for: a) ?? .distantPast) > (lastModifiedDate(for: b) ?? .distantPast)
+            }
+        }
     }
 
     var body: some View {
@@ -25,34 +33,72 @@ struct ProjectListView: View {
                 ProgressView("Scanning…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if projects.isEmpty {
-                ContentUnavailableView(
+                /*ContentUnavailableView(
                     "No Projects Found",
                     systemImage: "magnifyingglass",
                     description: Text("No Xcode projects or Swift packages were found in this directory.")
-                )
+                )*/
+                EmptyView()
             } else {
-                List(selection: $selection) {
-                    let xcodeProjects = filteredProjects.filter { $0.kind == .xcodeProject }
-                    let swiftPackages = filteredProjects.filter { $0.kind == .swiftPackage }
+                ScrollViewReader { proxy in
+                    List(selection: $selection) {
+                        let xcodeProjects = filteredProjects.filter { $0.kind == .xcodeProject }
+                        let swiftPackages = filteredProjects.filter { $0.kind == .swiftPackage }
 
-                    if !xcodeProjects.isEmpty {
-                        Section("Xcode Projects", isExpanded: $isXcodeProjectsExpanded) {
-                            ForEach(xcodeProjects) { project in
-                                projectRow(project)
+                        if !xcodeProjects.isEmpty {
+                            Section("Xcode Projects", isExpanded: $isXcodeProjectsExpanded) {
+                                ForEach(xcodeProjects) { project in
+                                    projectRow(project)
+                                }
+                            }
+                        }
+
+                        if !swiftPackages.isEmpty {
+                            Section("Swift Packages", isExpanded: $isSwiftPackagesExpanded) {
+                                ForEach(swiftPackages) { project in
+                                    projectRow(project)
+                                }
                             }
                         }
                     }
-
-                    if !swiftPackages.isEmpty {
-                        Section("Swift Packages", isExpanded: $isSwiftPackagesExpanded) {
-                            ForEach(swiftPackages) { project in
-                                projectRow(project)
+                    .listStyle(.sidebar)
+                    .searchable(text: $searchText, placement: .sidebar, prompt: "Filter")
+                    .toolbar {
+                        ToolbarItem(placement: .automatic) {
+                            Menu {
+                                Button {
+                                    settings.projectSortOrder = .alphabetical
+                                } label: {
+                                    if settings.projectSortOrder == .alphabetical {
+                                        Label("Alphabetical", systemImage: "checkmark")
+                                    } else {
+                                        Text("Alphabetical")
+                                    }
+                                }
+                                Button {
+                                    settings.projectSortOrder = .recentlyChanged
+                                } label: {
+                                    if settings.projectSortOrder == .recentlyChanged {
+                                        Label("Recently Changed", systemImage: "checkmark")
+                                    } else {
+                                        Text("Recently Changed")
+                                    }
+                                }
+                            } label: {
+                                Label("Sort Order", systemImage: "arrow.up.arrow.down")
+                            }
+                        }
+                    }
+                    .onChange(of: selection) {
+                        if let selection {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                withAnimation {
+                                    proxy.scrollTo(selection.id, anchor: .center)
+                                }
                             }
                         }
                     }
                 }
-                .listStyle(.sidebar)
-                .searchable(text: $searchText, placement: .sidebar, prompt: "Filter")
             }
         }
     }
@@ -68,14 +114,25 @@ struct ProjectListView: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(project.name)
                     .lineLimit(1)
-                Text(project.parentName)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                if let date = lastModifiedDate(for: project) {
+                    Text(date, format: .relative(presentation: .named))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
         }
         .tag(project)
         .contextMenu { projectContextMenu(for: project) }
+    }
+
+    private func lastModifiedDate(for project: DiscoveredProject) -> Date? {
+        let directory = switch project.kind {
+        case .xcodeProject: project.url.deletingLastPathComponent()
+        case .swiftPackage: project.url
+        }
+        return try? FileManager.default
+            .attributesOfItem(atPath: directory.path(percentEncoded: false))[.modificationDate] as? Date
     }
 
     @ViewBuilder
@@ -99,14 +156,24 @@ struct ProjectListView: View {
 
     @ViewBuilder
     private func projectContextMenu(for project: DiscoveredProject) -> some View {
-        Button("Reveal in Finder") {
+        if settings.favoriteProjectPaths.contains(project.stablePath) {
+            Button("Remove from Favorites", systemImage: "star.slash") {
+                settings.favoriteProjectPaths.removeAll { $0 == project.stablePath }
+            }
+        } else {
+            Button("Add to Favorites", systemImage: "star") {
+                settings.favoriteProjectPaths.append(project.stablePath)
+            }
+        }
+        Divider()
+        Button("Reveal in Finder", systemImage: "folder") {
             let directory = switch project.kind {
             case .xcodeProject: project.url.deletingLastPathComponent()
             case .swiftPackage: project.url
             }
             NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path(percentEncoded: false))
         }
-        Button("Open in Xcode") {
+        Button("Open in Xcode", systemImage: "hammer") {
             let url = switch project.kind {
             case .xcodeProject: project.url
             case .swiftPackage: project.url.appendingPathComponent("Package.swift")

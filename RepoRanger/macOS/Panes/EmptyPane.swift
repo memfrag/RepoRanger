@@ -8,7 +8,12 @@ struct EmptyPane: View {
     var body: some View {
         Pane {
             VStack {
-                Text("Select a project to view its README")
+                Image("RepoRangerRacoon")
+                    .resizable()
+                    .frame(width: 200, height: 200)
+                    .foregroundStyle(.black)
+                    .opacity(0.2)
+                    .blendMode(.darken)
             }
         }
     }

@@ -32,6 +32,8 @@ struct DiscoveredProject: Identifiable, Hashable {
         }
     }
 
+    var stablePath: String { url.path(percentEncoded: false) }
+
     var iconColor: Color {
         switch kind {
         case .xcodeProject: .blue

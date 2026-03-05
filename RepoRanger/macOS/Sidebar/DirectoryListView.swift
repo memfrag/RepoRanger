@@ -8,7 +8,9 @@ struct DirectoryListView: View {
 
     @Bindable var settings: AppSettings
     @Binding var selection: MonitoredDirectory?
-    var projectCounts: [UUID: Int]
+    @Binding var selectedProject: DiscoveredProject?
+    var allProjects: [DiscoveredProject]
+    var projectsByDirectory: [UUID: [DiscoveredProject]]
     var addSection: () -> Void
 
     @State private var renamingSection: SidebarSection?
@@ -16,6 +18,8 @@ struct DirectoryListView: View {
 
     var body: some View {
         List(selection: $selection) {
+            favoritesSection
+
             ForEach(settings.sidebarSections) { section in
                 sectionView(for: section)
             }
@@ -53,7 +57,7 @@ struct DirectoryListView: View {
                             .foregroundStyle(selection?.id == directory.id ? .white : .blue)
                     }
                     Spacer()
-                    if let count = projectCounts[directory.id], count > 0 {
+                    if let count = projectsByDirectory[directory.id]?.count, count > 0 {
                         Text("\(count)")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -61,7 +65,7 @@ struct DirectoryListView: View {
                 }
                 .tag(directory)
                     .contextMenu {
-                        Button("Reveal in Finder") {
+                        Button("Reveal in Finder", systemImage: "folder") {
                             if let url = directory.resolveURL() {
                                 NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: url.path(percentEncoded: false))
                                 url.stopAccessingSecurityScopedResource()
@@ -71,7 +75,7 @@ struct DirectoryListView: View {
                         if settings.sidebarSections.count > 1 {
                             Menu("Move to") {
                                 ForEach(settings.sidebarSections.filter { $0.id != section.id }) { targetSection in
-                                    Button(targetSection.name) {
+                                    Button(targetSection.name, systemImage: "folder") {
                                         moveDirectory(directory, from: section, to: targetSection)
                                     }
                                 }
@@ -80,7 +84,7 @@ struct DirectoryListView: View {
 
                         Divider()
 
-                        Button("Remove", role: .destructive) {
+                        Button("Remove", systemImage: "trash", role: .destructive) {
                             withAnimation {
                                 removeDirectory(directory, from: section)
                             }
@@ -107,16 +111,16 @@ struct DirectoryListView: View {
                 .padding(.trailing, 6)
             }
             .contextMenu {
-                Button("Add Directory") {
+                Button("Add Directory", systemImage: "plus") {
                     addDirectory(to: section)
                 }
                 Divider()
-                Button("Rename Section") {
+                Button("Rename Section", systemImage: "pencil") {
                     renameText = section.name
                     renamingSection = section
                 }
                 Divider()
-                Button("Delete Section", role: .destructive) {
+                Button("Delete Section", systemImage: "trash", role: .destructive) {
                     withAnimation {
                         deleteSection(section)
                     }
@@ -125,10 +129,118 @@ struct DirectoryListView: View {
         }
     }
 
+    private var favoriteProjects: [DiscoveredProject] {
+        settings.favoriteProjectPaths.compactMap { path in
+            allProjects.first { $0.stablePath == path }
+        }
+    }
+
+    @ViewBuilder
+    private var favoritesSection: some View {
+        Section("Favorites") {
+            if favoriteProjects.isEmpty {
+                Text("No Favorites")
+                    .foregroundStyle(.secondary)
+                    .font(.caption)
+            } else {
+                ForEach(favoriteProjects) { project in
+                    favoriteRow(project)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func favoriteIcon(for project: DiscoveredProject) -> some View {
+        switch project.kind {
+        case .xcodeProject:
+            Image(systemName: "hammer.fill")
+                .font(.system(size: 7))
+                .foregroundStyle(.black)
+                .frame(width: 14, height: 14)
+                .offset(x: 0.5, y: -0.5)
+                .background(
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(.blue)
+                )
+        case .swiftPackage:
+            Image(systemName: "shippingbox.fill")
+                .foregroundStyle(project.iconColor)
+        }
+    }
+
+    private func favoriteRow(_ project: DiscoveredProject) -> some View {
+        Button {
+            selectFavorite(project)
+        } label: {
+            HStack(spacing: 6) {
+                favoriteIcon(for: project)
+                Text(project.name)
+                    .lineLimit(1)
+            }
+        }
+        .buttonStyle(.plain)
+        .draggable(project.stablePath)
+        .dropDestination(for: String.self) { items, _ in
+            guard let draggedPath = items.first,
+                  let fromIndex = settings.favoriteProjectPaths.firstIndex(of: draggedPath),
+                  let toIndex = settings.favoriteProjectPaths.firstIndex(of: project.stablePath),
+                  fromIndex != toIndex else { return false }
+            withAnimation {
+                settings.favoriteProjectPaths.move(fromOffsets: IndexSet(integer: fromIndex), toOffset: toIndex > fromIndex ? toIndex + 1 : toIndex)
+            }
+            return true
+        }
+        .contextMenu {
+            let index = settings.favoriteProjectPaths.firstIndex(of: project.stablePath)
+            Button("Move Up", systemImage: "arrow.up") {
+                if let i = index, i > 0 {
+                    settings.favoriteProjectPaths.swapAt(i, i - 1)
+                }
+            }
+            .disabled(index == settings.favoriteProjectPaths.startIndex)
+            Button("Move Down", systemImage: "arrow.down") {
+                if let i = index, i < settings.favoriteProjectPaths.count - 1 {
+                    settings.favoriteProjectPaths.swapAt(i, i + 1)
+                }
+            }
+            .disabled(index == settings.favoriteProjectPaths.count - 1)
+            Divider()
+            Button("Remove from Favorites", systemImage: "star.slash") {
+                settings.favoriteProjectPaths.removeAll { $0 == project.stablePath }
+            }
+            Divider()
+            Button("Reveal in Finder", systemImage: "folder") {
+                let directory = switch project.kind {
+                case .xcodeProject: project.url.deletingLastPathComponent()
+                case .swiftPackage: project.url
+                }
+                NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path(percentEncoded: false))
+            }
+            Button("Open in Xcode", systemImage: "hammer") {
+                let url = switch project.kind {
+                case .xcodeProject: project.url
+                case .swiftPackage: project.url.appendingPathComponent("Package.swift")
+                }
+                let xcodeURL = URL(filePath: "/Applications/Xcode.app")
+                NSWorkspace.shared.open([url], withApplicationAt: xcodeURL, configuration: NSWorkspace.OpenConfiguration())
+            }
+        }
+    }
+
+    private func selectFavorite(_ project: DiscoveredProject) {
+        // Find the directory that contains this project
+        if let (directoryID, _) = projectsByDirectory.first(where: { $0.value.contains(where: { $0.stablePath == project.stablePath }) }) {
+            let directory = settings.monitoredDirectories.first { $0.id == directoryID }
+            selection = directory
+        }
+        selectedProject = project
+    }
+
     private var bottomBar: some View {
         HStack {
             Menu {
-                Button("Add Section") {
+                Button("Add Section", systemImage: "plus") {
                     addSection()
                 }
             } label: {

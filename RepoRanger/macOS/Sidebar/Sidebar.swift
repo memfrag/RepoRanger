@@ -6,7 +6,7 @@ import SwiftUI
 
 struct Sidebar: View {
 
-    @State private var settings = AppSettings()
+    @Environment(AppSettings.self) private var settings
 
     @State private var selectedDirectory: MonitoredDirectory?
     @State private var selectedProject: DiscoveredProject?
@@ -22,7 +22,9 @@ struct Sidebar: View {
             DirectoryListView(
                 settings: settings,
                 selection: $selectedDirectory,
-                projectCounts: projectsByDirectory.mapValues(\.count),
+                selectedProject: $selectedProject,
+                allProjects: allProjects,
+                projectsByDirectory: projectsByDirectory,
                 addSection: { isAddingSectionAlertPresented = true }
             )
             .navigationTitle("Directories")
@@ -37,6 +39,7 @@ struct Sidebar: View {
             }
         } content: {
             ProjectListView(
+                settings: settings,
                 projects: selectedDirectoryProjects,
                 isScanning: isScanning,
                 selection: $selectedProject
@@ -55,12 +58,19 @@ struct Sidebar: View {
             }
         } detail: {
             if let selectedProject {
-                ReadmeDetailView(project: selectedProject)
+                ReadmeDetailView(settings: settings, project: selectedProject)
             } else {
                 EmptyPane()
             }
         }
         .onChange(of: selectedDirectory) {
+            // Don't clear if the selected project belongs to the newly selected directory
+            if let project = selectedProject,
+               let dirID = selectedDirectory?.id,
+               let projects = projectsByDirectory[dirID],
+               projects.contains(where: { $0.stablePath == project.stablePath }) {
+                return
+            }
             selectedProject = nil
         }
         .onChange(of: settings.monitoredDirectories) {
@@ -85,6 +95,10 @@ struct Sidebar: View {
             url.stopAccessingSecurityScopedResource()
         }
         accessedURLs = []
+    }
+
+    private var allProjects: [DiscoveredProject] {
+        projectsByDirectory.values.flatMap { $0 }
     }
 
     private var selectedDirectoryProjects: [DiscoveredProject] {

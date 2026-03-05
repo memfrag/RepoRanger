@@ -8,8 +8,9 @@ struct MenuBarWindow: Scene {
     var body: some Scene {
         MenuBarExtra {
             MenuBarPopup()
+                .appEnvironment(.default)
         } label: {
-            Image(systemName: "hammer")
+            Image(systemName: "shippingbox.fill")
         }
         .menuBarExtraStyle(.window)
         //.menuBarExtraStyle(.menu)

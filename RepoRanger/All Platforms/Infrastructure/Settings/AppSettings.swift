@@ -25,6 +25,8 @@ import KeyValueStore
         
         case monitoredDirectories
         case sidebarSections
+        case favoriteProjectPaths
+        case projectSortOrder
     }
 
     // MARK: Properties
@@ -48,6 +50,18 @@ import KeyValueStore
         }
     }
 
+    public var favoriteProjectPaths: [String] {
+        didSet {
+            store.save(favoriteProjectPaths, for: .favoriteProjectPaths)
+        }
+    }
+
+    public var projectSortOrder: ProjectSortOrder {
+        didSet {
+            store.save(projectSortOrder, for: .projectSortOrder)
+        }
+    }
+
     // MARK: Setup
 
     /// The key–value store that backs this settings container.
@@ -65,5 +79,7 @@ import KeyValueStore
         
         monitoredDirectories = self.store.load(.monitoredDirectories, default: [])
         sidebarSections = self.store.load(.sidebarSections, default: [])
+        favoriteProjectPaths = self.store.load(.favoriteProjectPaths, default: [])
+        projectSortOrder = self.store.load(.projectSortOrder, default: .alphabetical)
     }
 }
