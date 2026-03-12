@@ -184,12 +184,7 @@ struct ProjectListView: View {
             NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path(percentEncoded: false))
         }
         Button("Open in Xcode", systemImage: "hammer") {
-            let url = switch project.kind {
-            case .xcodeProject: project.url
-            case .swiftPackage: project.url.appendingPathComponent("Package.swift")
-            }
-            let xcodeURL = URL(filePath: "/Applications/Xcode.app")
-            NSWorkspace.shared.open([url], withApplicationAt: xcodeURL, configuration: NSWorkspace.OpenConfiguration())
+            project.openInXcode()
         }
         Divider()
         Button("Copy Path", systemImage: "doc.on.doc") {

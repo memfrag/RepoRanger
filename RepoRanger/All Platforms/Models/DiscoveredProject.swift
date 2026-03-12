@@ -32,7 +32,9 @@ struct DiscoveredProject: Identifiable, Hashable {
         }
     }
 
-    var stablePath: String { url.path(percentEncoded: false) }
+    var stablePath: String {
+        url.path(percentEncoded: false)
+    }
 
     var iconColor: Color {
         switch kind {

@@ -18,6 +18,8 @@ struct Sidebar: View {
     @State private var historyIndex: Int = -1
     @State private var isNavigating = false
 
+    @State private var isCommandKBarPresented = false
+
     @State private var isAddingSectionAlertPresented = false
     @State private var newSectionName = ""
 
@@ -83,6 +85,28 @@ struct Sidebar: View {
                     }
             } else {
                 EmptyPane()
+            }
+        }
+        .focusedSceneValue(\.commandKBarToggle, $isCommandKBarPresented)
+        .overlay {
+            if isCommandKBarPresented {
+                ZStack {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            isCommandKBarPresented = false
+                        }
+                    VStack {
+                        CommandKBar(
+                            projects: allProjects,
+                            isPresented: $isCommandKBarPresented,
+                            onSelect: { selectProject($0) }
+                        )
+                        .padding(.top, 80)
+                        Spacer()
+                    }
+                }
+                .transition(.identity)
             }
         }
         .onChange(of: selectedProject) {
@@ -152,6 +176,15 @@ struct Sidebar: View {
         historyIndex += 1
         selectedProject = history[historyIndex]
         isNavigating = false
+    }
+
+    private func selectProject(_ project: DiscoveredProject) {
+        if let (directoryID, _) = projectsByDirectory.first(where: {
+            $0.value.contains(where: { $0.stablePath == project.stablePath })
+        }) {
+            selectedDirectory = settings.monitoredDirectories.first { $0.id == directoryID }
+        }
+        selectedProject = project
     }
 
     private var allProjects: [DiscoveredProject] {
