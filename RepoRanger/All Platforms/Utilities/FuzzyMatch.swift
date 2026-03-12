@@ -7,7 +7,7 @@ import Foundation
 /// Returns a match score (lower is better) if `pattern` fuzzy-matches `text`,
 /// or `nil` if not all pattern characters are found in order.
 func fuzzyMatch(pattern: String, text: String) -> Int? {
-    guard !pattern.isEmpty else { return 0 }
+    guard !pattern.isEmpty else { return nil }
 
     let patternChars = Array(pattern.lowercased())
     let textChars = Array(text.lowercased())

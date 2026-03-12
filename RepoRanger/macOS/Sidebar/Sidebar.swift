@@ -112,6 +112,7 @@ struct Sidebar: View {
         .onChange(of: selectedProject) {
             guard !isNavigating else { return }
             guard let project = selectedProject else { return }
+            settings.recordRecentProject(project.stablePath)
             if historyIndex >= 0, historyIndex < history.count,
                history[historyIndex].stablePath == project.stablePath {
                 return

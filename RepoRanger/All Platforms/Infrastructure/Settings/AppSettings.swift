@@ -27,6 +27,7 @@ import KeyValueStore
         case sidebarSections
         case favoriteProjectPaths
         case projectSortOrder
+        case recentProjectPaths
     }
 
     // MARK: Properties
@@ -62,6 +63,23 @@ import KeyValueStore
         }
     }
 
+    public var recentProjectPaths: [String] {
+        didSet {
+            store.save(recentProjectPaths, for: .recentProjectPaths)
+        }
+    }
+
+    /// Records a project path as the most recently viewed, keeping at most 10 entries.
+    public func recordRecentProject(_ path: String) {
+        var paths = recentProjectPaths
+        paths.removeAll { $0 == path }
+        paths.insert(path, at: 0)
+        if paths.count > 10 {
+            paths = Array(paths.prefix(10))
+        }
+        recentProjectPaths = paths
+    }
+
     // MARK: Setup
 
     /// The key–value store that backs this settings container.
@@ -81,5 +99,6 @@ import KeyValueStore
         sidebarSections = self.store.load(.sidebarSections, default: [])
         favoriteProjectPaths = self.store.load(.favoriteProjectPaths, default: [])
         projectSortOrder = self.store.load(.projectSortOrder, default: .alphabetical)
+        recentProjectPaths = self.store.load(.recentProjectPaths, default: [])
     }
 }

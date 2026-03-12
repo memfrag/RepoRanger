@@ -16,6 +16,7 @@ struct CommandKBar: View {
     @Binding var isPresented: Bool
     var onSelect: (DiscoveredProject) -> Void
 
+    @Environment(AppSettings.self) private var settings
     @State private var searchText = ""
     @State private var selectedIndex = 0
     @FocusState private var isSearchFieldFocused: Bool
@@ -24,8 +25,12 @@ struct CommandKBar: View {
         let sorted: [DiscoveredProject]
 
         if searchText.isEmpty {
-            sorted = projects
-                .sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
+            let recentPaths = settings.recentProjectPaths
+            let projectsByPath = Dictionary(
+                projects.map { ($0.stablePath, $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+            sorted = recentPaths.compactMap { projectsByPath[$0] }
         } else {
             sorted = projects
                 .compactMap { project -> (DiscoveredProject, Int, Int)? in
@@ -60,7 +65,7 @@ struct CommandKBar: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
 
-                TextField("Quick Find…", text: $searchText)
+                TextField("Quick Find…", text: $searchText.animation())
                     .textFieldStyle(.plain)
                     .font(.title3)
                     .focused($isSearchFieldFocused)
@@ -197,6 +202,7 @@ struct CommandKBar: View {
     private func openSelected() {
         guard filteredProjects.indices.contains(selectedIndex) else { return }
         let project = filteredProjects[selectedIndex].project
+        settings.recordRecentProject(project.stablePath)
         onSelect(project)
         isPresented = false
     }
