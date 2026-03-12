@@ -72,8 +72,10 @@ struct CommandKBar: View {
                     .autocorrectionDisabled()
                     .textContentType(.none)
                     .onSubmit {
+                        // Fallback for plain Return without modifiers
                         openSelected()
                     }
+
             }
             .padding(12)
 
@@ -87,6 +89,14 @@ struct CommandKBar: View {
                             let project = indexedProject.project
 
                             resultRow(project, isSelected: index == selectedIndex)
+                                .simultaneousGesture(TapGesture().modifiers(.command).onEnded {
+                                    selectedIndex = index
+                                    revealSelectedInFinder()
+                                })
+                                .simultaneousGesture(TapGesture().modifiers(.option).onEnded {
+                                    selectedIndex = index
+                                    openSelectedInXcode()
+                                })
                                 .onTapGesture {
                                     selectedIndex = index
                                     openSelected()
@@ -105,13 +115,25 @@ struct CommandKBar: View {
                     clampSelectedIndex()
                 }
             }
+
+            if !filteredProjects.isEmpty {
+                Divider()
+
+                HStack(spacing: 12) {
+                    shortcutHint("⌘⏎", "Reveal in Finder")
+                    shortcutHint("⌥⏎", "Open in Xcode")
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+            }
         }
         .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(.separator, lineWidth: 0.5)
         )
-        .shadow(color: .black.opacity(0.3), radius: 20, y: 10)
+        .shadow(color: .black.opacity(0.5), radius: 20, y: 10)
         .frame(width: 500)
         .fixedSize(horizontal: false, vertical: true)
         .focusEffectDisabled()
@@ -134,6 +156,16 @@ struct CommandKBar: View {
                 selectedIndex += 1
             }
             return .handled
+        }
+        .onKeyPress(.return, phases: .down) { keyPress in
+            if keyPress.modifiers.contains(.command) {
+                revealSelectedInFinder()
+                return .handled
+            } else if keyPress.modifiers.contains(.option) {
+                openSelectedInXcode()
+                return .handled
+            }
+            return .ignored
         }
         .onKeyPress(.escape) {
             isPresented = false
@@ -171,6 +203,21 @@ struct CommandKBar: View {
         .contentShape(Rectangle())
     }
 
+    private func shortcutHint(_ key: String, _ label: String) -> some View {
+        HStack(spacing: 4) {
+            Text(key)
+                .tracking(2)
+                .font(.caption.monospaced())
+                .padding(.horizontal, 4)
+                .padding(.vertical, 1)
+                .background(.quaternary, in: RoundedRectangle(cornerRadius: 3))
+
+            Text(label)
+                .font(.caption2)
+        }
+        .foregroundStyle(.tertiary)
+    }
+
     @ViewBuilder
     private func projectIcon(for project: DiscoveredProject) -> some View {
         switch project.kind {
@@ -204,6 +251,22 @@ struct CommandKBar: View {
         let project = filteredProjects[selectedIndex].project
         settings.recordRecentProject(project.stablePath)
         onSelect(project)
+        isPresented = false
+    }
+
+    private func revealSelectedInFinder() {
+        guard filteredProjects.indices.contains(selectedIndex) else { return }
+        let project = filteredProjects[selectedIndex].project
+        settings.recordRecentProject(project.stablePath)
+        NSWorkspace.shared.activateFileViewerSelecting([project.url])
+        isPresented = false
+    }
+
+    private func openSelectedInXcode() {
+        guard filteredProjects.indices.contains(selectedIndex) else { return }
+        let project = filteredProjects[selectedIndex].project
+        settings.recordRecentProject(project.stablePath)
+        project.openInXcode()
         isPresented = false
     }
 }
