@@ -8,6 +8,7 @@ import MarkdownUI
 struct ReadmeDetailView: View {
 
     @Bindable var settings: AppSettings
+    @Environment(\.openURL) private var openURL
     let project: DiscoveredProject
 
     @State private var document: MarkdownDocument?
@@ -173,7 +174,7 @@ struct ReadmeDetailView: View {
             urlString = String(urlString.dropLast(4))
         }
         if let url = URL(string: urlString) {
-            NSWorkspace.shared.open(url)
+            openURL(url)
         }
     }
 
