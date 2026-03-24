@@ -4,9 +4,12 @@
 
 import SwiftUI
 import SwiftUIToolbox
+import Sparkle
 
 struct MainWindow: Scene {
-    
+
+    let updater: SPUUpdater
+
     var body: some Scene {
 
         WindowGroup {
@@ -20,6 +23,7 @@ struct MainWindow: Scene {
             SidebarCommands()
             ExportCommands()
             AlwaysOnTopCommand()
+            CheckForUpdatesCommand(updater: updater)
             HelpCommands()
             
             /// Add a menu with custom commands

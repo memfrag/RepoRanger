@@ -6,19 +6,26 @@ import SwiftUI
 import SwiftUIToolbox
 import AttributionsUI
 import AppDesign
+import Sparkle
 
 @main
 struct MacApp: App {
-    
+
     // swiftlint:disable:next weak_delegate
     @NSApplicationDelegateAdaptor(MacAppDelegate.self) var appDelegate
-    
+
+    private let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
+
     init() {
         AppDesign.apply()
     }
     
     var body: some Scene {
-        MainWindow()
+        MainWindow(updater: updaterController.updater)
         MenuBarWindow()
         SettingsWindow()
         AboutWindow(developedBy: "Apparata AB",

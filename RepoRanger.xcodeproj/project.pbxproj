@@ -15,6 +15,7 @@
 		26ED5A23F18C44871EE56A89 /* MathKit in Frameworks */ = {isa = PBXBuildFile; productRef = 91EE0AAF066C20689EDFEA7D /* MathKit */; };
 		2F75DF12EE776AC2BA16F3A5 /* AppRouting in Frameworks */ = {isa = PBXBuildFile; productRef = 2903981DF0293DD9420175BE /* AppRouting */; };
 		417E0F5A2F58EA30000E07EE /* AppDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 417E0F592F58EA30000E07EE /* AppDesign */; };
+		417E24CB2F731633000E07EE /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 417E24CA2F731633000E07EE /* Sparkle */; };
 		4E1A55AF0BB1429D5271A00A /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = B24C394336B71D40E9F7DF3F /* MarkdownUI */; };
 		7513657ACBA168B95A0CE8CC /* Zipcode in Frameworks */ = {isa = PBXBuildFile; productRef = 6C3F2F57686F99CFA71E3881 /* Zipcode */; };
 		81E4D9E1C2834F38146B6263 /* SensibleStyling in Frameworks */ = {isa = PBXBuildFile; productRef = 4734E3AC594D6122C49CC3A2 /* SensibleStyling */; };
@@ -53,6 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				417E24CB2F731633000E07EE /* Sparkle in Frameworks */,
 				2F75DF12EE776AC2BA16F3A5 /* AppRouting in Frameworks */,
 				84E00E300FAD93EFDB9C6AAF /* AttributionsUI in Frameworks */,
 				137427D7FB2F47E21544C25A /* BinaryDataKit in Frameworks */,
@@ -155,6 +157,7 @@
 				54C0F9B6BF8A8E26F5EEF491 /* UserDefaultsUI */,
 				6C3F2F57686F99CFA71E3881 /* Zipcode */,
 				417E0F592F58EA30000E07EE /* AppDesign */,
+				417E24CA2F731633000E07EE /* Sparkle */,
 			);
 			productName = RepoRanger;
 			productReference = F867A950A4993174C04FDB9D /* RepoRanger.app */;
@@ -201,6 +204,7 @@
 				53E900630F815ABA5E0E6764 /* XCRemoteSwiftPackageReference "UserDefaultsUI" */,
 				0510E2495A8F3CE1F91EA8AF /* XCRemoteSwiftPackageReference "Zipcode" */,
 				189D3381ED7C106178615EBE /* XCLocalSwiftPackageReference "Packages/AppDesign" */,
+				417E24C92F731633000E07EE /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			projectDirPath = "";
 			projectRoot = "";
@@ -318,6 +322,8 @@
 				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_SUFeedURL = "https://github.com/memfrag/RepoRanger/releases.atom";
+				INFOPLIST_KEY_SUPublicEDKey = "AvJMcXvL9lwbU8D00Z9uECjR9zdeOlcsl7Rktg/hQVE=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -358,6 +364,8 @@
 				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_SUFeedURL = "https://github.com/memfrag/RepoRanger/releases.atom";
+				INFOPLIST_KEY_SUPublicEDKey = "AvJMcXvL9lwbU8D00Z9uECjR9zdeOlcsl7Rktg/hQVE=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -523,6 +531,14 @@
 				version = 1.1.1;
 			};
 		};
+		417E24C92F731633000E07EE /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.0;
+			};
+		};
 		496B2BC00430E4E52AAA32E5 /* XCRemoteSwiftPackageReference "SwiftUIToolbox" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apparata/SwiftUIToolbox.git";
@@ -653,6 +669,11 @@
 		417E0F592F58EA30000E07EE /* AppDesign */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AppDesign;
+		};
+		417E24CA2F731633000E07EE /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 417E24C92F731633000E07EE /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 		44AE6C6FF3423F8CF8F048CA /* CGMath */ = {
 			isa = XCSwiftPackageProductDependency;
