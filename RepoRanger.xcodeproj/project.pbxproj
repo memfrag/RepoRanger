@@ -248,7 +248,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SPARKLE_FRAMEWORK=\"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\nif [ -d \"$SPARKLE_FRAMEWORK\" ]; then\n    for item in \"$SPARKLE_FRAMEWORK\"/*; do\n        if [ ! -L \"$item\" ] && [ \"$(basename \"$item\")\" != \"Versions\" ]; then\n            rm -rf \"$item\"\n        fi\n    done\n    codesign --force --deep --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" \"$SPARKLE_FRAMEWORK\"\nfi\n";
+			shellScript = "SPARKLE_FRAMEWORK=\"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\nif [ -d \"$SPARKLE_FRAMEWORK\" ]; then\n    for item in \"$SPARKLE_FRAMEWORK\"/*; do\n        if [ ! -L \"$item\" ] && [ \"$(basename \"$item\")\" != \"Versions\" ]; then\n            rm -rf \"$item\"\n        fi\n    done\n    if [ \"$CONFIGURATION\" = \"Debug\" ]; then\n        codesign --force --deep --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" \"$SPARKLE_FRAMEWORK\"\n    fi\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

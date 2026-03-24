@@ -109,6 +109,9 @@ struct Sidebar: View {
                 .transition(.identity)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openCommandKBar)) { _ in
+            isCommandKBarPresented = true
+        }
         .onChange(of: selectedProject) {
             guard !isNavigating else { return }
             guard let project = selectedProject else { return }

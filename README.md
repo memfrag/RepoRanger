@@ -50,6 +50,10 @@ The script expects a keychain profile named `notary` for notarization credential
 xcrun notarytool store-credentials notary --apple-id <APPLE_ID> --team-id <TEAM_ID>
 ```
 
+## License
+
+RepoRanger is released under the [BSD Zero Clause License](LICENSE) (0BSD).
+
 ## Project Structure
 
 ```

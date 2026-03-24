@@ -1,5 +1,5 @@
 {
-  "originHash" : "24672db4c43a04517fc66bd74725838063016852e81d20c208b77527431a270a",
+  "originHash" : "85effdb607f42ca5d5af018b5529bba78e4fc4c67bb008d3ee375b191a48db97",
   "pins" : [
     {
       "identity" : "approuting",
@@ -53,6 +53,15 @@
       "state" : {
         "revision" : "a21e0f6443372485e6eb8acc13549f61580d511e",
         "version" : "2.1.2"
+      }
+    },
+    {
+      "identity" : "hotkey",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/soffes/HotKey.git",
+      "state" : {
+        "revision" : "a3cf605d7a96f6ff50e04fcb6dea6e2613cfcbe4",
+        "version" : "0.2.1"
       }
     },
     {
