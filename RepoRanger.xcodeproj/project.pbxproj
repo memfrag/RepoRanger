@@ -127,6 +127,7 @@
 				F2783CDA0B0AC2989190E81A /* Sources */,
 				3A82619B510158CBDEC128BB /* Frameworks */,
 				417E0FDA2F58FD6F000E07EE /* Resources */,
+				417E25622F7324AA000E07EE /* Fix Sparkle Framework Seal */,
 			);
 			buildRules = (
 			);
@@ -223,6 +224,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		417E25622F7324AA000E07EE /* Fix Sparkle Framework Seal */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Fix Sparkle Framework Seal";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "SPARKLE_FRAMEWORK=\"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\nif [ -d \"$SPARKLE_FRAMEWORK\" ]; then\n    for item in \"$SPARKLE_FRAMEWORK\"/*; do\n        if [ ! -L \"$item\" ] && [ \"$(basename \"$item\")\" != \"Versions\" ]; then\n            rm -rf \"$item\"\n        fi\n    done\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F2783CDA0B0AC2989190E81A /* Sources */ = {
