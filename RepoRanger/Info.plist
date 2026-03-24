@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>SUFeedURL</key>
-	<string>https://github.com/memfrag/RepoRanger/releases.atom</string>
+	<string>https://raw.githubusercontent.com/memfrag/RepoRanger/main/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>AvJMcXvL9lwbU8D00Z9uECjR9zdeOlcsl7Rktg/hQVE=</string>
 </dict>

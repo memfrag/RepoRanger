@@ -126,4 +126,29 @@ gh release create "$TAG" "$DMG_PATH" \
     --title "$RELEASE_TITLE" \
     --generate-notes
 
+echo "==> Generating appcast..."
+APPCAST_DIR="$BUILD_DIR/appcast-assets"
+mkdir -p "$APPCAST_DIR"
+
+# Download all existing release DMGs
+gh release list --repo memfrag/RepoRanger --json tagName -q '.[].tagName' | while read -r RTAG; do
+    gh release download "$RTAG" --repo memfrag/RepoRanger --pattern "*.dmg" --dir "$APPCAST_DIR" --skip-existing 2>/dev/null || true
+done
+
+# Copy the new DMG
+cp "$DMG_PATH" "$APPCAST_DIR/"
+
+# Generate appcast.xml
+"$SPARKLE_TOOLS_DIR/bin/generate_appcast" \
+    --download-url-prefix "https://github.com/memfrag/RepoRanger/releases/download/$TAG/" \
+    -o "$APPCAST_DIR/appcast.xml" \
+    "$APPCAST_DIR"
+
+# Copy appcast to project root and commit
+cp "$APPCAST_DIR/appcast.xml" "$PROJECT_DIR/appcast.xml"
+cd "$PROJECT_DIR"
+git add appcast.xml
+git commit -m "Update appcast for $VERSION"
+git push origin HEAD
+
 echo "==> Done: https://github.com/memfrag/RepoRanger/releases/tag/$TAG"
