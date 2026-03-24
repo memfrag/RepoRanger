@@ -344,9 +344,8 @@
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RepoRanger/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_SUFeedURL = "https://github.com/memfrag/RepoRanger/releases.atom";
-				INFOPLIST_KEY_SUPublicEDKey = "AvJMcXvL9lwbU8D00Z9uECjR9zdeOlcsl7Rktg/hQVE=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -386,9 +385,8 @@
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RepoRanger/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_SUFeedURL = "https://github.com/memfrag/RepoRanger/releases.atom";
-				INFOPLIST_KEY_SUPublicEDKey = "AvJMcXvL9lwbU8D00Z9uECjR9zdeOlcsl7Rktg/hQVE=";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

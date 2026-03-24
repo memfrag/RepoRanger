@@ -87,31 +87,31 @@ xcodebuild -exportArchive \
 
 APP_PATH="$EXPORT_DIR/$APP_NAME.app"
 VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$APP_PATH/Contents/Info.plist")
-ZIP_PATH="$BUILD_DIR/$APP_NAME-$VERSION.zip"
+DMG_PATH="$BUILD_DIR/$APP_NAME-$VERSION.dmg"
 
 echo "==> Verifying codesign..."
 codesign --verify --deep --strict "$APP_PATH"
 echo "Codesign OK."
 
-echo "==> Zipping for notarization..."
-NOTARIZE_ZIP="$BUILD_DIR/$APP_NAME-notarize.zip"
-ditto -c -k --keepParent "$APP_PATH" "$NOTARIZE_ZIP"
+echo "==> Creating DMG for notarization..."
+DMG_STAGING="$BUILD_DIR/dmg-staging"
+mkdir -p "$DMG_STAGING"
+cp -a "$APP_PATH" "$DMG_STAGING/"
+ln -s /Applications "$DMG_STAGING/Applications"
+hdiutil create -volname "$APP_NAME" -srcfolder "$DMG_STAGING" \
+    -ov -format UDZO "$DMG_PATH"
+rm -rf "$DMG_STAGING"
 
 echo "==> Submitting for notarization..."
-xcrun notarytool submit "$NOTARIZE_ZIP" \
+xcrun notarytool submit "$DMG_PATH" \
     --keychain-profile "$KEYCHAIN_PROFILE" \
     --wait || { echo "Notarization failed. Run: xcrun notarytool log <submission-id> --keychain-profile $KEYCHAIN_PROFILE"; exit 1; }
 
-rm "$NOTARIZE_ZIP"
-
 echo "==> Stapling..."
-xcrun stapler staple "$APP_PATH"
+xcrun stapler staple "$DMG_PATH"
 
-echo "==> Packaging ZIP..."
-ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
-
-echo "==> Signing ZIP for Sparkle..."
-"$SPARKLE_TOOLS_DIR/bin/sign_update" "$ZIP_PATH"
+echo "==> Signing DMG for Sparkle..."
+"$SPARKLE_TOOLS_DIR/bin/sign_update" "$DMG_PATH"
 
 echo "==> Creating GitHub release..."
 printf "Release title ($VERSION: ): "
@@ -121,7 +121,7 @@ TAG="$VERSION"
 cd "$PROJECT_DIR"
 git tag "$TAG"
 git push origin "$TAG"
-gh release create "$TAG" "$ZIP_PATH" \
+gh release create "$TAG" "$DMG_PATH" \
     --repo memfrag/RepoRanger \
     --title "$RELEASE_TITLE" \
     --generate-notes
