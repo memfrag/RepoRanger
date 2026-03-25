@@ -130,12 +130,12 @@ echo "==> Generating appcast..."
 APPCAST_DIR="$BUILD_DIR/appcast-assets"
 mkdir -p "$APPCAST_DIR"
 
-# Download all existing release DMGs
-gh release list --repo memfrag/RepoRanger --json tagName -q '.[].tagName' | while read -r RTAG; do
-    gh release download "$RTAG" --repo memfrag/RepoRanger --pattern "*.dmg" --dir "$APPCAST_DIR" --skip-existing 2>/dev/null || true
-done
+# Copy existing appcast if present, so generate_appcast can update it
+if [ -f "$PROJECT_DIR/appcast.xml" ]; then
+    cp "$PROJECT_DIR/appcast.xml" "$APPCAST_DIR/"
+fi
 
-# Copy the new DMG
+# Only include the new DMG
 cp "$DMG_PATH" "$APPCAST_DIR/"
 
 # Generate appcast.xml
