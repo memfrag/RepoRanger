@@ -3,6 +3,15 @@
     <channel>
         <title>RepoRanger</title>
         <item>
+            <title>1.3.7</title>
+            <pubDate>Fri, 27 Mar 2026 14:42:43 +0100</pubDate>
+            <sparkle:version>1.3.7</sparkle:version>
+            <sparkle:shortVersionString>1.3.7</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/memfrag/RepoRanger/releases/download/1.3.7/RepoRanger-1.3.7.dmg" length="5588874" type="application/octet-stream" sparkle:edSignature="tN5zczANRE+yHfnH9DWZ0vVie58kawZkdH4lwmnduUEDH8bud8wv0oJfKRxFExCxWVgLsT5pbItQokpcfFoLCA=="/>
+        </item>
+        <item>
             <title>1.3.6</title>
             <pubDate>Fri, 27 Mar 2026 14:14:58 +0100</pubDate>
             <sparkle:version>1.3.6</sparkle:version>
@@ -19,15 +28,6 @@
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
             <enclosure url="https://github.com/memfrag/RepoRanger/releases/download/1.3.5/RepoRanger-1.3.5.dmg" length="5588788" type="application/octet-stream" sparkle:edSignature="k6dGQ68AuMHn/YDSl2M1OYK4xF9oPvE0aHoeABXZXttldITFtcGm3FXEpVphXahIy0ACTTm6cM8GyomXOGHLBw=="/>
-        </item>
-        <item>
-            <title>1.3.3</title>
-            <pubDate>Wed, 25 Mar 2026 00:42:15 +0100</pubDate>
-            <sparkle:version>1</sparkle:version>
-            <sparkle:shortVersionString>1.3.4</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/memfrag/RepoRanger/releases/download/1.3.4/RepoRanger-1.3.4.dmg" length="5585960" type="application/octet-stream" sparkle:edSignature="fMmex1nV0CrxGjVX4hCdPrMKRGY3SnckAtVfukPY3whyKB77iEwL0oYMjkysI1FABC2QvSRUBEKWP826BhuuCQ=="/>
         </item>
     </channel>
 </rss>
