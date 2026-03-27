@@ -130,7 +130,7 @@
 				F2783CDA0B0AC2989190E81A /* Sources */,
 				3A82619B510158CBDEC128BB /* Frameworks */,
 				417E0FDA2F58FD6F000E07EE /* Resources */,
-				417E25622F7324AA000E07EE /* Fix Sparkle Framework Seal */,
+				413230D12F76B79800647128 /* Copy Sparkle XPC services */,
 			);
 			buildRules = (
 			);
@@ -231,7 +231,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		417E25622F7324AA000E07EE /* Fix Sparkle Framework Seal */ = {
+		413230D12F76B79800647128 /* Copy Sparkle XPC services */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -241,14 +241,14 @@
 			);
 			inputPaths = (
 			);
-			name = "Fix Sparkle Framework Seal";
+			name = "Copy Sparkle XPC services";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "SPARKLE_FRAMEWORK=\"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\nif [ -d \"$SPARKLE_FRAMEWORK\" ]; then\n    for item in \"$SPARKLE_FRAMEWORK\"/*; do\n        if [ ! -L \"$item\" ] && [ \"$(basename \"$item\")\" != \"Versions\" ]; then\n            rm -rf \"$item\"\n        fi\n    done\n    if [ \"$CONFIGURATION\" = \"Debug\" ]; then\n        codesign --force --deep --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" \"$SPARKLE_FRAMEWORK\"\n    fi\nfi\n";
+			shellScript = "SPARKLE_FRAMEWORK=\"${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\nXPC_DEST=\"${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/XPCServices\"\n\nif [ -d \"$SPARKLE_FRAMEWORK/Versions/Current/XPCServices\" ]; then\n    mkdir -p \"$XPC_DEST\"\n    cp -a \"$SPARKLE_FRAMEWORK/Versions/Current/XPCServices/\"*.xpc \"$XPC_DEST/\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -333,7 +333,7 @@
 				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.3.5;
+				CURRENT_PROJECT_VERSION = 1.3.6;
 				DEVELOPMENT_ASSET_PATHS = "\"RepoRanger/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_BITCODE = NO;
@@ -355,7 +355,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.3.5;
+				MARKETING_VERSION = 1.3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = io.apparata.RepoRanger;
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
 				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
@@ -374,7 +374,7 @@
 				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1.3.5;
+				CURRENT_PROJECT_VERSION = 1.3.6;
 				DEVELOPMENT_ASSET_PATHS = "\"RepoRanger/Preview Content\"";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_BITCODE = NO;
@@ -396,7 +396,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.3.5;
+				MARKETING_VERSION = 1.3.6;
 				PRODUCT_BUNDLE_IDENTIFIER = io.apparata.RepoRanger;
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
 				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
