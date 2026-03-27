@@ -16,6 +16,7 @@ struct MainWindow: Scene {
             Sidebar()
                 .frame(minWidth: 700, minHeight: 400)
                 .background(AlwaysOnTop())
+                .background(HideOnClose())
                 .appEnvironment(.default)
         }
         .commands {
