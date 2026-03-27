@@ -56,6 +56,7 @@ if [ -n "$LATEST" ]; then
         echo "==> Updating version in project to $NEW_VERSION..."
         PBXPROJ="$PROJECT_DIR/$APP_NAME.xcodeproj/project.pbxproj"
         sed -i '' "s/MARKETING_VERSION = .*/MARKETING_VERSION = $NEW_VERSION;/g" "$PBXPROJ"
+        sed -i '' "s/CURRENT_PROJECT_VERSION = .*/CURRENT_PROJECT_VERSION = $NEW_VERSION;/g" "$PBXPROJ"
         cd "$PROJECT_DIR"
         git add "$APP_NAME.xcodeproj/project.pbxproj"
         git commit -m "Version $NEW_VERSION"
