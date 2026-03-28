@@ -12,9 +12,30 @@ extension Notification.Name {
 class MacAppDelegate: NSObject, NSApplicationDelegate {
 
     private var hotKey: HotKey?
+    private var observations: [NSKeyValueObservation] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        hotKey = HotKey(key: .section, modifiers: [.command, .shift])
+        registerHotKey()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(hotkeySettingsChanged),
+            name: Notification.Name("HotkeySettingsChanged"),
+            object: nil
+        )
+    }
+
+    @objc private func hotkeySettingsChanged() {
+        registerHotKey()
+    }
+
+    private func registerHotKey() {
+        let settings = AppEnvironment.default.appSettings
+        let combo = KeyCombo(
+            carbonKeyCode: settings.hotkeyKeyCode,
+            carbonModifiers: settings.hotkeyModifiers
+        )
+        hotKey = HotKey(keyCombo: combo)
         hotKey?.keyDownHandler = {
             Self.showMainWindow()
             NotificationCenter.default.post(name: .openCommandKBar, object: nil)

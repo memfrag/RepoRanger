@@ -29,6 +29,8 @@ import KeyValueStore
         case projectSortOrder
         case recentProjectPaths
         case gitClientPath
+        case hotkeyKeyCode
+        case hotkeyModifiers
     }
 
     // MARK: Properties
@@ -76,6 +78,18 @@ import KeyValueStore
         }
     }
 
+    public var hotkeyKeyCode: UInt32 {
+        didSet {
+            store.save(Int(hotkeyKeyCode), for: .hotkeyKeyCode)
+        }
+    }
+
+    public var hotkeyModifiers: UInt32 {
+        didSet {
+            store.save(Int(hotkeyModifiers), for: .hotkeyModifiers)
+        }
+    }
+
     /// Records a project path as the most recently viewed, keeping at most 10 entries.
     public func recordRecentProject(_ path: String) {
         var paths = recentProjectPaths
@@ -108,5 +122,8 @@ import KeyValueStore
         projectSortOrder = self.store.load(.projectSortOrder, default: .alphabetical)
         recentProjectPaths = self.store.load(.recentProjectPaths, default: [])
         gitClientPath = self.store.load(.gitClientPath, default: "/Applications/SourceTree.app/Contents/Resources/stree")
+        // Defaults: § key (0x0A), Cmd+Shift (cmdKey 0x100 | shiftKey 0x200 = 0x300)
+        hotkeyKeyCode = UInt32(self.store.load(.hotkeyKeyCode, default: 0x0A))
+        hotkeyModifiers = UInt32(self.store.load(.hotkeyModifiers, default: 0x300))
     }
 }
