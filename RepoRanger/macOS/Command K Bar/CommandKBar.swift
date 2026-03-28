@@ -97,6 +97,10 @@ struct CommandKBar: View {
                                     selectedIndex = index
                                     openSelectedInXcode()
                                 })
+                                .simultaneousGesture(TapGesture().modifiers(.shift).onEnded {
+                                    selectedIndex = index
+                                    openSelectedInGitClient()
+                                })
                                 .onTapGesture {
                                     selectedIndex = index
                                     openSelected()
@@ -122,6 +126,7 @@ struct CommandKBar: View {
                 HStack(spacing: 12) {
                     shortcutHint("⌘⏎", "Reveal in Finder")
                     shortcutHint("⌥⏎", "Open in Xcode")
+                    shortcutHint("⇧⏎", "Open in Git Client")
                     Spacer()
                 }
                 .padding(.horizontal, 12)
@@ -163,6 +168,9 @@ struct CommandKBar: View {
                 return .handled
             } else if keyPress.modifiers.contains(.option) {
                 openSelectedInXcode()
+                return .handled
+            } else if keyPress.modifiers.contains(.shift) {
+                openSelectedInGitClient()
                 return .handled
             }
             return .ignored
@@ -267,6 +275,21 @@ struct CommandKBar: View {
         let project = filteredProjects[selectedIndex].project
         settings.recordRecentProject(project.stablePath)
         project.openInXcode()
+        isPresented = false
+    }
+
+    private func openSelectedInGitClient() {
+        guard filteredProjects.indices.contains(selectedIndex) else { return }
+        let project = filteredProjects[selectedIndex].project
+        settings.recordRecentProject(project.stablePath)
+        let directory = switch project.kind {
+        case .xcodeProject: project.url.deletingLastPathComponent()
+        case .swiftPackage: project.url
+        }
+        let process = Process()
+        process.executableURL = URL(filePath: "/usr/bin/env")
+        process.arguments = [settings.gitClientPath, directory.path(percentEncoded: false)]
+        try? process.run()
         isPresented = false
     }
 }
