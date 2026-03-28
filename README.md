@@ -17,10 +17,25 @@ ctions like opening in Xcode or revealing in Finder.
 - **Favorites** — Mark projects as favorites for quick access from the menu bar.
 - **Menu bar** — A menu bar extra provides one-click access to favorite projects, opening them directly in Xcode.
 - **Sorting & filtering** — Sort projects alphabetically or by recently changed, and filter by name.
-- **Quick actions** — Open in Xcode, reveal in Finder, open in SourceTree, browse on GitHub, or copy the project path.
+- **Quick actions** — Open in Xcode, reveal in Finder, open in git client, browse on GitHub, or copy the project path.
 - **Navigation history** — Back/forward navigation between viewed projects.
 - **Sidebar sections** — Organize monitored directories into custom named sections.
 - **Always on top** — Optionally pin the window above other windows.
+- **Auto-updates** — Automatic update checking via Sparkle, distributed through GitHub Releases.
+- **Global hotkey** — Configurable system-wide shortcut (default: ⌘⇧§) to bring RepoRanger to front.
+
+## Quick Open
+
+Press **⌘K** (or the configurable global hotkey from any app) to open Quick Find. It uses fuzzy matching to search across all your projects by name.
+
+| Shortcut | Action |
+|----------|--------|
+| **⏎** | Select project |
+| **⌘⏎** | Reveal in Finder |
+| **⌥⏎** | Open in Xcode |
+| **⇧⏎** | Open in git client |
+
+When Quick Find opens with no search text, it shows your most recently viewed projects.
 
 ## License
 
