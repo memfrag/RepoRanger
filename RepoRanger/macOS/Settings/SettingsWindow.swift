@@ -14,6 +14,7 @@ struct SettingsWindow: Scene {
     var body: some Scene {
         Settings {
             tabs
+                .appEnvironment(.default)
         }
     }
     

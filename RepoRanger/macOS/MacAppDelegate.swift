@@ -33,7 +33,7 @@ class MacAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     static func showMainWindow() {
-        NSRunningApplication.current.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
+        NSRunningApplication.current.activate()
         if let window = NSApplication.shared.windows.first(where: { $0.title == "RepoRanger" }) {
             window.makeKeyAndOrderFront(nil)
         }

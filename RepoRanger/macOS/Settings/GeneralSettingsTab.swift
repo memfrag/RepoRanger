@@ -5,28 +5,19 @@
 import SwiftUI
 
 struct GeneralSettingsTab: View {
-    
-    @AppStorage("settings.general.name") private var name: String = ""
-    
+
+    @Environment(AppSettings.self) private var settings
+
     var body: some View {
+        @Bindable var settings = settings
         Form {
             Section {
-                TextField("Name:", text: $name, onCommit: {
-                    print("On commit!")
-                })
-                Text("This should describe the text field.")
+                TextField("Git Client Path:", text: $settings.gitClientPath)
+                Text("Path to the command-line tool used to open project directories (e.g. stree, fork, tower).")
                     .font(.caption)
-                Button("Apply", action: {
-                    print("Apply!")
-                })
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(20)
-    }
-}
-
-struct GeneralSettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        GeneralSettingsTab()
     }
 }

@@ -90,9 +90,9 @@ struct ReadmeDetailView: View {
             .sharedBackgroundVisibility(.hidden)
             ToolbarItem(placement: .automatic) {
                 Button {
-                    openInSourceTree()
+                    openInGitClient()
                 } label: {
-                    Label("Open in SourceTree", image: .branch)
+                    Label("Open in Git Client", image: .branch)
                 }
             }
             .sharedBackgroundVisibility(.hidden)
@@ -186,14 +186,14 @@ struct ReadmeDetailView: View {
         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path(percentEncoded: false))
     }
 
-    private func openInSourceTree() {
+    private func openInGitClient() {
         let directory = switch project.kind {
         case .xcodeProject: project.url.deletingLastPathComponent()
         case .swiftPackage: project.url
         }
         let process = Process()
         process.executableURL = URL(filePath: "/usr/bin/env")
-        process.arguments = ["/Applications/SourceTree.app/Contents/Resources/stree", directory.path(percentEncoded: false)]
+        process.arguments = [settings.gitClientPath, directory.path(percentEncoded: false)]
         try? process.run()
     }
 

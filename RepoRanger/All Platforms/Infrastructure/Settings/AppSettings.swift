@@ -28,6 +28,7 @@ import KeyValueStore
         case favoriteProjectPaths
         case projectSortOrder
         case recentProjectPaths
+        case gitClientPath
     }
 
     // MARK: Properties
@@ -69,6 +70,12 @@ import KeyValueStore
         }
     }
 
+    public var gitClientPath: String {
+        didSet {
+            store.save(gitClientPath, for: .gitClientPath)
+        }
+    }
+
     /// Records a project path as the most recently viewed, keeping at most 10 entries.
     public func recordRecentProject(_ path: String) {
         var paths = recentProjectPaths
@@ -100,5 +107,6 @@ import KeyValueStore
         favoriteProjectPaths = self.store.load(.favoriteProjectPaths, default: [])
         projectSortOrder = self.store.load(.projectSortOrder, default: .alphabetical)
         recentProjectPaths = self.store.load(.recentProjectPaths, default: [])
+        gitClientPath = self.store.load(.gitClientPath, default: "/Applications/SourceTree.app/Contents/Resources/stree")
     }
 }
