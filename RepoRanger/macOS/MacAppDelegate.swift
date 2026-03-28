@@ -29,7 +29,7 @@ class MacAppDelegate: NSObject, NSApplicationDelegate {
         if !flag {
             Self.showMainWindow()
         }
-        return true
+        return false
     }
 
     static func showMainWindow() {
