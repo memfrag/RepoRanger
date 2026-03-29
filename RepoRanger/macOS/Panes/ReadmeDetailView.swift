@@ -98,6 +98,14 @@ struct ReadmeDetailView: View {
             .sharedBackgroundVisibility(.hidden)
             ToolbarItem(placement: .automatic) {
                 Button {
+                    openInTerminal()
+                } label: {
+                    Label("Open in Terminal", systemImage: "apple.terminal")
+                }
+            }
+            .sharedBackgroundVisibility(.hidden)
+            ToolbarItem(placement: .automatic) {
+                Button {
                     revealInFinder()
                 } label: {
                     Label("Reveal in Finder", systemImage: "folder")
@@ -176,6 +184,18 @@ struct ReadmeDetailView: View {
         if let url = URL(string: urlString) {
             openURL(url)
         }
+    }
+
+    private func openInTerminal() {
+        let directory = switch project.kind {
+        case .xcodeProject: project.url.deletingLastPathComponent()
+        case .swiftPackage: project.url
+        }
+        NSWorkspace.shared.open(
+            [directory],
+            withApplicationAt: URL(filePath: "/System/Applications/Utilities/Terminal.app"),
+            configuration: NSWorkspace.OpenConfiguration()
+        )
     }
 
     private func revealInFinder() {
