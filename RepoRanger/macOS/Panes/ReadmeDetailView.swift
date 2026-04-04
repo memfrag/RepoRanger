@@ -14,6 +14,7 @@ struct ReadmeDetailView: View {
     @State private var document: MarkdownDocument?
     @State private var loadError: Bool = false
     @State private var metadata: ProjectMetadata?
+    @State private var isLicenseExpanded = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,13 +23,23 @@ struct ReadmeDetailView: View {
                     ForEach(metadataPills(metadata), id: \.label) { pill in
                         HStack(spacing: 4) {
                             Image(systemName: pill.icon)
-                            Text(pill.label)
+                            Text(pill.expandable && isLicenseExpanded
+                                 ? (pill.tooltip ?? pill.label)
+                                 : pill.label)
                         }
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(pill.tint.opacity(0.15), in: Capsule())
                         .foregroundStyle(pill.tint)
+                        .help(pill.tooltip ?? pill.label)
+                        .onTapGesture {
+                            if pill.expandable {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isLicenseExpanded.toggle()
+                                }
+                            }
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -225,6 +236,8 @@ struct ReadmeDetailView: View {
         let icon: String
         let label: String
         let tint: Color
+        var tooltip: String?
+        var expandable: Bool = false
     }
 
     private func metadataPills(_ metadata: ProjectMetadata) -> [PillItem] {
@@ -238,7 +251,35 @@ struct ReadmeDetailView: View {
         if metadata.hasUncommittedChanges {
             pills.append(PillItem(icon: "exclamationmark.circle", label: "Modified", tint: .orange))
         }
+        if let license = metadata.license {
+            pills.append(PillItem(
+                icon: "doc.text",
+                label: license,
+                tint: .blue,
+                tooltip: Self.licenseFullName(license),
+                expandable: true
+            ))
+        }
         return pills
+    }
+
+    private static func licenseFullName(_ identifier: String) -> String {
+        switch identifier {
+        case "MIT": "MIT License"
+        case "0BSD": "BSD Zero Clause License"
+        case "ISC": "ISC License"
+        case "Apache-2.0": "Apache License 2.0"
+        case "BSD-2": "BSD 2-Clause \"Simplified\" License"
+        case "BSD-3": "BSD 3-Clause \"New\" or \"Revised\" License"
+        case "GPL-2.0": "GNU General Public License v2.0"
+        case "GPL-3.0": "GNU General Public License v3.0"
+        case "LGPL-3.0": "GNU Lesser General Public License v3.0"
+        case "MPL-2.0": "Mozilla Public License 2.0"
+        case "Unlicense": "The Unlicense"
+        case "BSL-1.0": "Boost Software License 1.0"
+        case "Zlib": "zlib License"
+        default: identifier
+        }
     }
 
     private func loadReadme() async {

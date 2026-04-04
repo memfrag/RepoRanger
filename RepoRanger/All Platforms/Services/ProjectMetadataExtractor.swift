@@ -24,11 +24,13 @@ enum ProjectMetadataExtractor {
         case .swiftPackage: project.url
         }
         hasUncommittedChanges = await checkGitStatus(in: projectDirectory)
+        let license = LicenseDetector.detect(in: projectDirectory)?.identifier
 
         return ProjectMetadata(
             swiftToolsVersion: swiftToolsVersion,
             deploymentTargets: deploymentTargets,
-            hasUncommittedChanges: hasUncommittedChanges
+            hasUncommittedChanges: hasUncommittedChanges,
+            license: license
         )
     }
 

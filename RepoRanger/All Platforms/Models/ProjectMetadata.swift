@@ -8,4 +8,5 @@ struct ProjectMetadata {
     var swiftToolsVersion: String?
     var deploymentTargets: [String]
     var hasUncommittedChanges: Bool
+    var license: String?
 }
