@@ -3,6 +3,15 @@
     <channel>
         <title>RepoRanger</title>
         <item>
+            <title>1.7.0</title>
+            <pubDate>Sat, 04 Apr 2026 14:33:24 +0200</pubDate>
+            <sparkle:version>1.7.0</sparkle:version>
+            <sparkle:shortVersionString>1.7.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/memfrag/RepoRanger/releases/download/1.7.0/RepoRanger-1.7.0.dmg" length="5597047" type="application/octet-stream" sparkle:edSignature="h5VRp+7KKxGQFGnf96j3WYpgq5Mh68IDRxTSbvWeyNBrhPJO2ve6I0XYqJP8taN5woJLlYHGq4yG/8335nyyCw=="/>
+        </item>
+        <item>
             <title>1.6.0</title>
             <pubDate>Sun, 29 Mar 2026 14:14:52 +0200</pubDate>
             <sparkle:version>1.6.0</sparkle:version>
@@ -19,15 +28,6 @@
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
             <enclosure url="https://github.com/memfrag/RepoRanger/releases/download/1.5.0/RepoRanger-1.5.0.dmg" length="5595291" type="application/octet-stream" sparkle:edSignature="4zN9rFIyWy41Igd9w1oApqdtp/sUzFCjnU+7F8xZ5Teq7M/e5SODVKnxghaUhRaWdTgo35ox+CgkKC0eQI6XBg=="/>
-        </item>
-        <item>
-            <title>1.4.0</title>
-            <pubDate>Sat, 28 Mar 2026 15:00:01 +0100</pubDate>
-            <sparkle:version>1.4.0</sparkle:version>
-            <sparkle:shortVersionString>1.4.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
-            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/memfrag/RepoRanger/releases/download/1.4.0/RepoRanger-1.4.0.dmg" length="5595078" type="application/octet-stream" sparkle:edSignature="SgSB464zVVtxtC5POfQ+6/eYsy5VFBeHkA/CndJSqtliCR2gVZMvIY0FbovOBo6lLbHH5UwX2lZECzd7qdM0Ag=="/>
         </item>
     </channel>
 </rss>
