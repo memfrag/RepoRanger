@@ -293,7 +293,7 @@ struct ReadmeDetailView: View {
 
         do {
             let contents = try String(contentsOf: readmeURL, encoding: .utf8)
-            document = try MarkdownDocument(contents)
+            document = try MarkdownDocument(contents, baseURL: project.readmeURL?.deletingLastPathComponent())
         } catch {
             loadError = true
         }

@@ -17,7 +17,7 @@
 		417E0F5A2F58EA30000E07EE /* AppDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 417E0F592F58EA30000E07EE /* AppDesign */; };
 		417E24CB2F731633000E07EE /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 417E24CA2F731633000E07EE /* Sparkle */; };
 		417E27BA2F7350BE000E07EE /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 417E27B92F7350BE000E07EE /* HotKey */; };
-		4E1A55AF0BB1429D5271A00A /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = B24C394336B71D40E9F7DF3F /* MarkdownUI */; };
+		41885CC62F83F649000CD880 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 41885CC52F83F649000CD880 /* MarkdownUI */; };
 		7513657ACBA168B95A0CE8CC /* Zipcode in Frameworks */ = {isa = PBXBuildFile; productRef = 6C3F2F57686F99CFA71E3881 /* Zipcode */; };
 		81E4D9E1C2834F38146B6263 /* SensibleStyling in Frameworks */ = {isa = PBXBuildFile; productRef = 4734E3AC594D6122C49CC3A2 /* SensibleStyling */; };
 		84E00E300FAD93EFDB9C6AAF /* AttributionsUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3A4C5A6981974FBF62A7B9E9 /* AttributionsUI */; };
@@ -65,7 +65,6 @@
 				D1A4543B0316BC4FDCD15BE1 /* CollectionKit in Frameworks */,
 				0B41BD07860A417B08872A5C /* Constructs in Frameworks */,
 				2323207D418AADAD57FAF2E0 /* KeyValueStore in Frameworks */,
-				4E1A55AF0BB1429D5271A00A /* MarkdownUI in Frameworks */,
 				417E0F5A2F58EA30000E07EE /* AppDesign in Frameworks */,
 				A1A161EBCA47B1E145F0C74D /* Markin in Frameworks */,
 				26ED5A23F18C44871EE56A89 /* MathKit in Frameworks */,
@@ -76,6 +75,7 @@
 				11C9BDE45F9585CA647DE037 /* SystemKit in Frameworks */,
 				F2FC692DE12670BF2C3BC01C /* TextToolbox in Frameworks */,
 				DE2D6018D162CBF5A9B08FD7 /* URLToolbox in Frameworks */,
+				41885CC62F83F649000CD880 /* MarkdownUI in Frameworks */,
 				CF4F1882878707550CE0B52A /* UserDefaultsUI in Frameworks */,
 				7513657ACBA168B95A0CE8CC /* Zipcode in Frameworks */,
 			);
@@ -147,7 +147,6 @@
 				D23AA7534E27750A51813CD5 /* CollectionKit */,
 				BA0F300450C917B44022B6FA /* Constructs */,
 				D586429A85C4C48B67217E6D /* KeyValueStore */,
-				B24C394336B71D40E9F7DF3F /* MarkdownUI */,
 				5C83A4F5C4595469D7286E1C /* Markin */,
 				91EE0AAF066C20689EDFEA7D /* MathKit */,
 				0EBC50700EB11C1067F495E0 /* MessagePackKit */,
@@ -162,6 +161,7 @@
 				417E0F592F58EA30000E07EE /* AppDesign */,
 				417E24CA2F731633000E07EE /* Sparkle */,
 				417E27B92F7350BE000E07EE /* HotKey */,
+				41885CC52F83F649000CD880 /* MarkdownUI */,
 			);
 			productName = RepoRanger;
 			productReference = F867A950A4993174C04FDB9D /* RepoRanger.app */;
@@ -195,7 +195,6 @@
 				58DFF2946E1212C65F32518C /* XCRemoteSwiftPackageReference "CollectionKit" */,
 				16CEA5CAA2167A6A1EA17F1D /* XCRemoteSwiftPackageReference "Constructs" */,
 				D6BABAE248825E78FF076D86 /* XCRemoteSwiftPackageReference "KeyValueStore" */,
-				F0E90CC1833FEEFB9DE8678C /* XCRemoteSwiftPackageReference "MarkdownUI" */,
 				68D8387E9DAB4F5A4F659E9B /* XCRemoteSwiftPackageReference "Markin" */,
 				7B1123E35C3867D0E2E3C67C /* XCRemoteSwiftPackageReference "MathKit" */,
 				30F4ABFDA3FBE2C71E99015A /* XCRemoteSwiftPackageReference "MessagePackKit" */,
@@ -210,6 +209,7 @@
 				189D3381ED7C106178615EBE /* XCLocalSwiftPackageReference "Packages/AppDesign" */,
 				417E24C92F731633000E07EE /* XCRemoteSwiftPackageReference "Sparkle" */,
 				417E27B82F7350BE000E07EE /* XCRemoteSwiftPackageReference "HotKey" */,
+				41885CC42F83F649000CD880 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
 			);
 			projectDirPath = "";
 			projectRoot = "";
@@ -552,6 +552,14 @@
 				version = 0.2.1;
 			};
 		};
+		41885CC42F83F649000CD880 /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apparata/MarkdownUI";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.2;
+			};
+		};
 		496B2BC00430E4E52AAA32E5 /* XCRemoteSwiftPackageReference "SwiftUIToolbox" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apparata/SwiftUIToolbox.git";
@@ -648,14 +656,6 @@
 				version = 1.0.2;
 			};
 		};
-		F0E90CC1833FEEFB9DE8678C /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apparata/MarkdownUI.git";
-			requirement = {
-				kind = exactVersion;
-				version = 0.9.1;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -692,6 +692,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 417E27B82F7350BE000E07EE /* XCRemoteSwiftPackageReference "HotKey" */;
 			productName = HotKey;
+		};
+		41885CC52F83F649000CD880 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 41885CC42F83F649000CD880 /* XCRemoteSwiftPackageReference "MarkdownUI" */;
+			productName = MarkdownUI;
 		};
 		44AE6C6FF3423F8CF8F048CA /* CGMath */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -742,11 +747,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 496B2BC00430E4E52AAA32E5 /* XCRemoteSwiftPackageReference "SwiftUIToolbox" */;
 			productName = SwiftUIToolbox;
-		};
-		B24C394336B71D40E9F7DF3F /* MarkdownUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F0E90CC1833FEEFB9DE8678C /* XCRemoteSwiftPackageReference "MarkdownUI" */;
-			productName = MarkdownUI;
 		};
 		BA0F300450C917B44022B6FA /* Constructs */ = {
 			isa = XCSwiftPackageProductDependency;
