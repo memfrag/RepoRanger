@@ -7,7 +7,7 @@ import SwiftUI
 struct DirectoryListView: View {
 
     @Bindable var settings: AppSettings
-    @Binding var selection: MonitoredDirectory?
+    @Binding var selection: SidebarSelection?
     @Binding var selectedProject: DiscoveredProject?
     var allProjects: [DiscoveredProject]
     var projectsByDirectory: [UUID: [DiscoveredProject]]
@@ -15,6 +15,8 @@ struct DirectoryListView: View {
 
     @State private var renamingSection: SidebarSection?
     @State private var renameText: String = ""
+    @State private var editingCollection: ProjectCollection?
+    @State private var isShowingCollectionForm = false
 
     var body: some View {
         List(selection: $selection) {
@@ -23,6 +25,8 @@ struct DirectoryListView: View {
             ForEach(settings.sidebarSections) { section in
                 sectionView(for: section)
             }
+
+            collectionsSection
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             bottomBar
@@ -43,6 +47,25 @@ struct DirectoryListView: View {
                 renamingSection = nil
             }
         }
+        .sheet(isPresented: $isShowingCollectionForm) {
+            CollectionFormView(
+                settings: settings,
+                collection: editingCollection,
+                onSave: { collection in
+                    if let index = settings.collections.firstIndex(where: { $0.id == collection.id }) {
+                        settings.collections[index] = collection
+                    } else {
+                        settings.collections.append(collection)
+                    }
+                    editingCollection = nil
+                    isShowingCollectionForm = false
+                },
+                onCancel: {
+                    editingCollection = nil
+                    isShowingCollectionForm = false
+                }
+            )
+        }
     }
 
     @ViewBuilder
@@ -54,7 +77,7 @@ struct DirectoryListView: View {
                         Text(directory.displayName)
                     } icon: {
                         Image(systemName: "folder.fill")
-                            .foregroundStyle(selection?.id == directory.id ? .white : .blue)
+                            .foregroundStyle(selection == .directory(directory) ? .white : .blue)
                     }
                     Spacer()
                     if let count = projectsByDirectory[directory.id]?.count, count > 0 {
@@ -63,7 +86,7 @@ struct DirectoryListView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                .tag(directory)
+                .tag(SidebarSelection.directory(directory))
                     .contextMenu {
                         Button("Reveal in Finder", systemImage: "folder") {
                             if let url = directory.resolveURL() {
@@ -226,10 +249,54 @@ struct DirectoryListView: View {
     private func selectFavorite(_ project: DiscoveredProject) {
         // Find the directory that contains this project
         if let (directoryID, _) = projectsByDirectory.first(where: { $0.value.contains(where: { $0.stablePath == project.stablePath }) }) {
-            let directory = settings.monitoredDirectories.first { $0.id == directoryID }
-            selection = directory
+            if let directory = settings.monitoredDirectories.first(where: { $0.id == directoryID }) {
+                selection = .directory(directory)
+            }
         }
         selectedProject = project
+    }
+
+    @ViewBuilder
+    private var collectionsSection: some View {
+        Section {
+            Label("Recent", systemImage: "clock")
+                .tag(SidebarSelection.recentCollection)
+            ForEach(settings.collections) { collection in
+                Label(collection.name, systemImage: "line.3.horizontal.decrease.circle")
+                    .tag(SidebarSelection.customCollection(collection))
+                    .contextMenu {
+                        Button("Edit…", systemImage: "pencil") {
+                            editingCollection = collection
+                            isShowingCollectionForm = true
+                        }
+                        Divider()
+                        Button("Delete", systemImage: "trash", role: .destructive) {
+                            withAnimation {
+                                settings.collections.removeAll { $0.id == collection.id }
+                                if selection == .customCollection(collection) {
+                                    selection = nil
+                                }
+                            }
+                        }
+                    }
+            }
+        } header: {
+            HStack {
+                Text("Collections")
+                Spacer()
+                Button {
+                    editingCollection = nil
+                    isShowingCollectionForm = true
+                } label: {
+                    Image(systemName: "plus")
+                        .frame(width: 24, height: 20)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.tertiary)
+                .padding(.trailing, 6)
+            }
+        }
     }
 
     private var bottomBar: some View {
@@ -270,7 +337,7 @@ struct DirectoryListView: View {
         var updatedSections = settings.sidebarSections
         updatedSections[sectionIndex].directoryIDs.append(directory.id)
         settings.sidebarSections = updatedSections
-        selection = directory
+        selection = .directory(directory)
     }
 
     private func directoriesIn(_ section: SidebarSection) -> [MonitoredDirectory] {
@@ -296,7 +363,7 @@ struct DirectoryListView: View {
         updatedSections[sectionIndex].directoryIDs.removeAll { $0 == directory.id }
         settings.sidebarSections = updatedSections
         settings.monitoredDirectories.removeAll { $0.id == directory.id }
-        if selection?.id == directory.id {
+        if selection == .directory(directory) {
             selection = nil
         }
     }
@@ -311,7 +378,7 @@ struct DirectoryListView: View {
     private func deleteSection(_ section: SidebarSection) {
         let directoryIDsToRemove = Set(section.directoryIDs)
         settings.monitoredDirectories.removeAll { directoryIDsToRemove.contains($0.id) }
-        if let selected = selection, directoryIDsToRemove.contains(selected.id) {
+        if case .directory(let dir) = selection, directoryIDsToRemove.contains(dir.id) {
             selection = nil
         }
         var updatedSections = settings.sidebarSections

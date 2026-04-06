@@ -32,8 +32,60 @@ struct GeneralSettingsTab: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+
+            Section("Tags") {
+                if settings.availableTags.isEmpty {
+                    Text("No tags defined. Create tags from the project context menu.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(settings.availableTags, id: \.self) { tag in
+                        TagSettingsRow(tag: tag, settings: settings)
+                    }
+                }
+            }
         }
         .padding(20)
+    }
+}
+
+private struct TagSettingsRow: View {
+
+    let tag: String
+    let settings: AppSettings
+
+    @State private var isRenaming = false
+    @State private var editedName: String = ""
+
+    var body: some View {
+        HStack {
+            if isRenaming {
+                TextField("Tag name", text: $editedName, onCommit: {
+                    let name = editedName.trimmingCharacters(in: .whitespaces)
+                    if !name.isEmpty && name != tag {
+                        settings.renameTag(tag, to: name)
+                    }
+                    isRenaming = false
+                })
+                .textFieldStyle(.roundedBorder)
+            } else {
+                Text(tag)
+                Spacer()
+                Button {
+                    editedName = tag
+                    isRenaming = true
+                } label: {
+                    Image(systemName: "pencil")
+                }
+                .buttonStyle(.borderless)
+                Button(role: .destructive) {
+                    settings.deleteTag(tag)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+            }
+        }
     }
 }
 

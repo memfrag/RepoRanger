@@ -15,32 +15,78 @@ struct ReadmeDetailView: View {
     @State private var loadError: Bool = false
     @State private var metadata: ProjectMetadata?
     @State private var isLicenseExpanded = false
+    @State private var isShowingNewTagAlert = false
+    @State private var newTagName = ""
 
     var body: some View {
         VStack(spacing: 0) {
-            if let metadata, !metadataPills(metadata).isEmpty {
+            if let metadata, !metadataPills(metadata).isEmpty || !settings.tags(for: project).isEmpty {
                 FlowLayout(spacing: 6) {
                     ForEach(metadataPills(metadata), id: \.label) { pill in
+                            HStack(spacing: 4) {
+                                Image(systemName: pill.icon)
+                                Text(pill.expandable && isLicenseExpanded
+                                     ? (pill.tooltip ?? pill.label)
+                                     : pill.label)
+                            }
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(pill.tint.opacity(0.15), in: Capsule())
+                            .foregroundStyle(pill.tint)
+                            .help(pill.tooltip ?? pill.label)
+                            .onTapGesture {
+                                if pill.expandable {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        isLicenseExpanded.toggle()
+                                    }
+                                }
+                            }
+                        }
+                    ForEach(settings.tags(for: project), id: \.self) { tag in
                         HStack(spacing: 4) {
-                            Image(systemName: pill.icon)
-                            Text(pill.expandable && isLicenseExpanded
-                                 ? (pill.tooltip ?? pill.label)
-                                 : pill.label)
+                            Image(systemName: "tag.fill")
+                            Text(tag)
                         }
                         .font(.caption)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(pill.tint.opacity(0.15), in: Capsule())
-                        .foregroundStyle(pill.tint)
-                        .help(pill.tooltip ?? pill.label)
-                        .onTapGesture {
-                            if pill.expandable {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    isLicenseExpanded.toggle()
-                                }
+                        .background(.purple.opacity(0.15), in: Capsule())
+                        .foregroundStyle(.purple)
+                        .contextMenu {
+                            Button("Remove Tag", systemImage: "minus.circle", role: .destructive) {
+                                settings.toggleTag(tag, for: project)
                             }
                         }
                     }
+                    Menu {
+                        ForEach(settings.availableTags, id: \.self) { tag in
+                            Button {
+                                settings.toggleTag(tag, for: project)
+                            } label: {
+                                if settings.tags(for: project).contains(tag) {
+                                    Label(tag, systemImage: "checkmark")
+                                } else {
+                                    Text(tag)
+                                }
+                            }
+                        }
+                        if !settings.availableTags.isEmpty {
+                            Divider()
+                        }
+                        Button("New Tag…") {
+                            isShowingNewTagAlert = true
+                        }
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .menuIndicator(.hidden)
+                    .menuStyle(.borderlessButton)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 3.5)
+                    .background(Color.secondary.opacity(0.15), in: Capsule())
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 8)
@@ -144,6 +190,27 @@ struct ReadmeDetailView: View {
             let fetchedMetadata = await metadataTask
             await readmeTask
             metadata = fetchedMetadata
+        }
+        .alert("New Tag", isPresented: $isShowingNewTagAlert) {
+            TextField("Tag name", text: $newTagName)
+            Button("Add") {
+                let name = newTagName.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return }
+                if !settings.availableTags.contains(name) {
+                    settings.availableTags.append(name)
+                }
+                var tags = settings.tags(for: project)
+                if !tags.contains(name) {
+                    tags.append(name)
+                    settings.setTags(tags, for: project)
+                }
+                newTagName = ""
+            }
+            Button("Cancel", role: .cancel) {
+                newTagName = ""
+            }
+        } message: {
+            Text("Enter a name for the new tag.")
         }
     }
 

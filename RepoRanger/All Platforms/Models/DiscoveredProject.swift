@@ -24,6 +24,7 @@ struct DiscoveredProject: Identifiable, Hashable {
     let url: URL
     let readmeURL: URL?
     let parentName: String
+    let isGitRepo: Bool
 
     var systemImage: String {
         switch kind {

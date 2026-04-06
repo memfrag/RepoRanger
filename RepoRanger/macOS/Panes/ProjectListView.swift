@@ -14,9 +14,19 @@ struct ProjectListView: View {
     @State private var isXcodeProjectsExpanded = true
     @State private var isSwiftPackagesExpanded = true
     @State private var searchText = ""
+    @State private var activeTagFilters: Set<String> = []
+    @State private var isShowingNewTagAlert = false
+    @State private var newTagName = ""
+    @State private var newTagTargetProject: DiscoveredProject?
 
     private var filteredProjects: [DiscoveredProject] {
-        let base = searchText.isEmpty ? projects : projects.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        var base = searchText.isEmpty ? projects : projects.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        if !activeTagFilters.isEmpty {
+            base = base.filter { project in
+                let projectTags = Set(settings.tags(for: project))
+                return activeTagFilters.isSubset(of: projectTags)
+            }
+        }
         switch settings.projectSortOrder {
         case .alphabetical:
             return base
@@ -94,10 +104,62 @@ struct ProjectListView: View {
                                 Image(systemName: "arrow.up.arrow.down")
                             }
                             .buttonStyle(.plain)
+
+                            if !settings.availableTags.isEmpty {
+                                Menu {
+                                    ForEach(settings.availableTags, id: \.self) { tag in
+                                        Button {
+                                            if activeTagFilters.contains(tag) {
+                                                activeTagFilters.remove(tag)
+                                            } else {
+                                                activeTagFilters.insert(tag)
+                                            }
+                                        } label: {
+                                            if activeTagFilters.contains(tag) {
+                                                Label(tag, systemImage: "checkmark")
+                                            } else {
+                                                Text(tag)
+                                            }
+                                        }
+                                    }
+                                    if !activeTagFilters.isEmpty {
+                                        Divider()
+                                        Button("Clear Filters") {
+                                            activeTagFilters.removeAll()
+                                        }
+                                    }
+                                } label: {
+                                    Image(systemName: activeTagFilters.isEmpty ? "tag" : "tag.fill")
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 8)
                         .background(Material.ultraThin)
+                    }
+                    .alert("New Tag", isPresented: $isShowingNewTagAlert) {
+                        TextField("Tag name", text: $newTagName)
+                        Button("Add") {
+                            let name = newTagName.trimmingCharacters(in: .whitespaces)
+                            guard !name.isEmpty else { return }
+                            if !settings.availableTags.contains(name) {
+                                settings.availableTags.append(name)
+                            }
+                            if let project = newTagTargetProject {
+                                var tags = settings.tags(for: project)
+                                if !tags.contains(name) {
+                                    tags.append(name)
+                                    settings.setTags(tags, for: project)
+                                }
+                            }
+                            newTagTargetProject = nil
+                        }
+                        Button("Cancel", role: .cancel) {
+                            newTagTargetProject = nil
+                        }
+                    } message: {
+                        Text("Enter a name for the new tag.")
                     }
                     .onChange(of: selection) {
                         if let selection {
@@ -129,6 +191,19 @@ struct ProjectListView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                }
+                let tags = settings.tags(for: project)
+                if !tags.isEmpty {
+                    HStack(spacing: 3) {
+                        ForEach(tags, id: \.self) { tag in
+                            Text(tag)
+                                .font(.system(size: 9))
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(.purple.opacity(0.15), in: Capsule())
+                                .foregroundStyle(.purple)
+                        }
+                    }
                 }
             }
         }
@@ -185,6 +260,26 @@ struct ProjectListView: View {
         }
         Button("Open in Xcode", systemImage: "hammer") {
             project.openInXcode()
+        }
+        Divider()
+        Menu("Tags") {
+            ForEach(settings.availableTags, id: \.self) { tag in
+                Button {
+                    settings.toggleTag(tag, for: project)
+                } label: {
+                    if settings.tags(for: project).contains(tag) {
+                        Label(tag, systemImage: "checkmark")
+                    } else {
+                        Text(tag)
+                    }
+                }
+            }
+            Divider()
+            Button("New Tag…") {
+                newTagName = ""
+                newTagTargetProject = project
+                isShowingNewTagAlert = true
+            }
         }
         Divider()
         Button("Copy Path", systemImage: "doc.on.doc") {

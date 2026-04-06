@@ -8,7 +8,7 @@ struct Sidebar: View {
 
     @Environment(AppSettings.self) private var settings
 
-    @State private var selectedDirectory: MonitoredDirectory?
+    @State private var sidebarSelection: SidebarSelection?
     @State private var selectedProject: DiscoveredProject?
     @State private var projectsByDirectory: [UUID: [DiscoveredProject]] = [:]
     @State private var isScanning: Bool = false
@@ -27,7 +27,7 @@ struct Sidebar: View {
         NavigationSplitView {
             DirectoryListView(
                 settings: settings,
-                selection: $selectedDirectory,
+                selection: $sidebarSelection,
                 selectedProject: $selectedProject,
                 allProjects: allProjects,
                 projectsByDirectory: projectsByDirectory,
@@ -56,11 +56,11 @@ struct Sidebar: View {
         } content: {
             ProjectListView(
                 settings: settings,
-                projects: selectedDirectoryProjects,
+                projects: selectedProjects,
                 isScanning: isScanning,
                 selection: $selectedProject
             )
-            .navigationTitle(selectedDirectory?.displayName ?? "Projects")
+            .navigationTitle(selectedTitle)
             .frame(minWidth: 200, idealWidth: 250)
         } detail: {
             if let selectedProject {
@@ -124,13 +124,13 @@ struct Sidebar: View {
             history.append(project)
             historyIndex = history.count - 1
         }
-        .onChange(of: selectedDirectory) {
-            // Don't clear if the selected project belongs to the newly selected directory
-            if let project = selectedProject,
-               let dirID = selectedDirectory?.id,
-               let projects = projectsByDirectory[dirID],
-               projects.contains(where: { $0.stablePath == project.stablePath }) {
-                return
+        .onChange(of: sidebarSelection) {
+            // Don't clear if the selected project belongs to the new selection
+            if let project = selectedProject {
+                let projects = selectedProjects
+                if projects.contains(where: { $0.stablePath == project.stablePath }) {
+                    return
+                }
             }
             selectedProject = nil
         }
@@ -186,7 +186,9 @@ struct Sidebar: View {
         if let (directoryID, _) = projectsByDirectory.first(where: {
             $0.value.contains(where: { $0.stablePath == project.stablePath })
         }) {
-            selectedDirectory = settings.monitoredDirectories.first { $0.id == directoryID }
+            if let dir = settings.monitoredDirectories.first(where: { $0.id == directoryID }) {
+                sidebarSelection = .directory(dir)
+            }
         }
         selectedProject = project
     }
@@ -195,9 +197,107 @@ struct Sidebar: View {
         projectsByDirectory.values.flatMap { $0 }
     }
 
-    private var selectedDirectoryProjects: [DiscoveredProject] {
-        guard let id = selectedDirectory?.id else { return [] }
-        return projectsByDirectory[id] ?? []
+    private var selectedDirectory: MonitoredDirectory? {
+        if case .directory(let dir) = sidebarSelection { return dir }
+        return nil
+    }
+
+    private var selectedTitle: String {
+        switch sidebarSelection {
+        case .directory(let dir): dir.displayName
+        case .recentCollection: "Recent"
+        case .customCollection(let col): col.name
+        case nil: "Projects"
+        }
+    }
+
+    private var selectedProjects: [DiscoveredProject] {
+        switch sidebarSelection {
+        case .directory(let dir):
+            return projectsByDirectory[dir.id] ?? []
+        case .recentCollection:
+            return recentProjects
+        case .customCollection(let collection):
+            return filteredProjects(for: collection)
+        case nil:
+            return []
+        }
+    }
+
+    private var recentProjects: [DiscoveredProject] {
+        let sixMonthsAgo = Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? .distantPast
+        return allProjects
+            .compactMap { project -> (DiscoveredProject, Date)? in
+                guard let date = lastModifiedDate(for: project), date >= sixMonthsAgo else { return nil }
+                return (project, date)
+            }
+            .sorted { $0.1 > $1.1 }
+            .map(\.0)
+    }
+
+    private func filteredProjects(for collection: ProjectCollection) -> [DiscoveredProject] {
+        var projects = allProjects
+
+        // Filter by directory
+        if let dirID = collection.directoryID {
+            projects = projectsByDirectory[dirID] ?? []
+        }
+
+        // Filter by kind
+        switch collection.kindFilter {
+        case .all: break
+        case .xcodeOnly: projects = projects.filter { $0.kind == .xcodeProject }
+        case .swiftPackageOnly: projects = projects.filter { $0.kind == .swiftPackage }
+        }
+
+        // Filter by tags (AND logic)
+        if !collection.tagFilters.isEmpty {
+            projects = projects.filter { project in
+                let projectTags = Set(settings.tags(for: project))
+                return Set(collection.tagFilters).isSubset(of: projectTags)
+            }
+        }
+
+        // Filter by time limit
+        if let cutoff = collection.timeLimit.cutoffDate {
+            projects = projects.filter { project in
+                guard let date = lastModifiedDate(for: project) else { return false }
+                return date >= cutoff
+            }
+        }
+
+        // Filter by README
+        switch collection.readmeFilter {
+        case .any: break
+        case .yes: projects = projects.filter { $0.readmeURL != nil }
+        case .no: projects = projects.filter { $0.readmeURL == nil }
+        }
+
+        // Filter by git repo
+        switch collection.gitRepoFilter {
+        case .any: break
+        case .yes: projects = projects.filter { $0.isGitRepo }
+        case .no: projects = projects.filter { !$0.isGitRepo }
+        }
+
+        // Sort
+        switch collection.sortOrder {
+        case .alphabetical:
+            return projects.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        case .recentlyChanged:
+            return projects.sorted { a, b in
+                (lastModifiedDate(for: a) ?? .distantPast) > (lastModifiedDate(for: b) ?? .distantPast)
+            }
+        }
+    }
+
+    private func lastModifiedDate(for project: DiscoveredProject) -> Date? {
+        let directory = switch project.kind {
+        case .xcodeProject: project.url.deletingLastPathComponent()
+        case .swiftPackage: project.url
+        }
+        return try? FileManager.default
+            .attributesOfItem(atPath: directory.path(percentEncoded: false))[.modificationDate] as? Date
     }
 
     private func scanAllDirectories() async {

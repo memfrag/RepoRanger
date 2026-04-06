@@ -43,12 +43,14 @@ enum DirectoryScanner {
                 let projectDir = url.deletingLastPathComponent()
                 let name = url.deletingPathExtension().lastPathComponent
                 let readmeURL = findReadme(in: projectDir)
+                let isGitRepo = fileManager.fileExists(atPath: projectDir.appendingPathComponent(".git").path(percentEncoded: false))
                 projects.append(DiscoveredProject(
                     name: name,
                     kind: .xcodeProject,
                     url: url,
                     readmeURL: readmeURL,
-                    parentName: projectDir.lastPathComponent
+                    parentName: projectDir.lastPathComponent,
+                    isGitRepo: isGitRepo
                 ))
                 xcodeProjectDirs.insert(projectDir.path(percentEncoded: false))
                 enumerator.skipDescendants()
@@ -56,12 +58,14 @@ enum DirectoryScanner {
                 let packageDir = url.deletingLastPathComponent()
                 let name = packageDir.lastPathComponent
                 let readmeURL = findReadme(in: packageDir)
+                let isGitRepo = fileManager.fileExists(atPath: packageDir.appendingPathComponent(".git").path(percentEncoded: false))
                 projects.append(DiscoveredProject(
                     name: name,
                     kind: .swiftPackage,
                     url: packageDir,
                     readmeURL: readmeURL,
-                    parentName: packageDir.deletingLastPathComponent().lastPathComponent
+                    parentName: packageDir.deletingLastPathComponent().lastPathComponent,
+                    isGitRepo: isGitRepo
                 ))
                 enumerator.skipDescendants()
             }

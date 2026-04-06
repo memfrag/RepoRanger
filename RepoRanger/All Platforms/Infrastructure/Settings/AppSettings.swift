@@ -31,6 +31,9 @@ import KeyValueStore
         case gitClientPath
         case hotkeyKeyCode
         case hotkeyModifiers
+        case projectTags
+        case availableTags
+        case collections
     }
 
     // MARK: Properties
@@ -90,6 +93,70 @@ import KeyValueStore
         }
     }
 
+    public var projectTags: [String: [String]] {
+        didSet {
+            store.save(projectTags, for: .projectTags)
+        }
+    }
+
+    public var availableTags: [String] {
+        didSet {
+            store.save(availableTags, for: .availableTags)
+        }
+    }
+
+    var collections: [ProjectCollection] {
+        didSet {
+            store.save(collections, for: .collections)
+        }
+    }
+
+    func tags(for project: DiscoveredProject) -> [String] {
+        projectTags[project.stablePath] ?? []
+    }
+
+    func setTags(_ tags: [String], for project: DiscoveredProject) {
+        if tags.isEmpty {
+            projectTags.removeValue(forKey: project.stablePath)
+        } else {
+            projectTags[project.stablePath] = tags
+        }
+    }
+
+    func toggleTag(_ tag: String, for project: DiscoveredProject) {
+        var tags = self.tags(for: project)
+        if tags.contains(tag) {
+            tags.removeAll { $0 == tag }
+        } else {
+            tags.append(tag)
+        }
+        setTags(tags, for: project)
+    }
+
+    public func renameTag(_ old: String, to new: String) {
+        guard old != new else { return }
+        if let index = availableTags.firstIndex(of: old) {
+            availableTags[index] = new
+        }
+        for (path, tags) in projectTags {
+            if tags.contains(old) {
+                projectTags[path] = tags.map { $0 == old ? new : $0 }
+            }
+        }
+    }
+
+    public func deleteTag(_ name: String) {
+        availableTags.removeAll { $0 == name }
+        for (path, tags) in projectTags {
+            let filtered = tags.filter { $0 != name }
+            if filtered.isEmpty {
+                projectTags.removeValue(forKey: path)
+            } else if filtered.count != tags.count {
+                projectTags[path] = filtered
+            }
+        }
+    }
+
     /// Records a project path as the most recently viewed, keeping at most 10 entries.
     public func recordRecentProject(_ path: String) {
         var paths = recentProjectPaths
@@ -125,5 +192,8 @@ import KeyValueStore
         // Defaults: § key (0x0A), Cmd+Shift (cmdKey 0x100 | shiftKey 0x200 = 0x300)
         hotkeyKeyCode = UInt32(self.store.load(.hotkeyKeyCode, default: 0x0A))
         hotkeyModifiers = UInt32(self.store.load(.hotkeyModifiers, default: 0x300))
+        projectTags = self.store.load(.projectTags, default: [:])
+        availableTags = self.store.load(.availableTags, default: [])
+        collections = self.store.load(.collections, default: [])
     }
 }
