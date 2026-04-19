@@ -4,8 +4,7 @@ A macOS app for discovering and managing Xcode projects and Swift packages acros
 
 ## Overview
 
-RepoRanger scans user-specified directories for Xcode projects (`.xcodeproj`) and Swift packages (`Package.swift`), presenting them in an organized three-column navigation interface. It provides quick access to README files, project metadata, and common a
-ctions like opening in Xcode or revealing in Finder.
+RepoRanger scans user-specified directories for Xcode projects (`.xcodeproj`) and Swift packages (`Package.swift`), presenting them in an organized three-column navigation interface. It provides quick access to README files, project metadata, and common actions like opening in Xcode or revealing in Finder.
 
 ![Screenshot](https://github.com/user-attachments/assets/8c16a214-a4d2-4b23-aa2e-85ba8a34633f)
 
