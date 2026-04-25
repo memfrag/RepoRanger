@@ -14,11 +14,18 @@ struct MacApp: App {
     // swiftlint:disable:next weak_delegate
     @NSApplicationDelegateAdaptor(MacAppDelegate.self) var appDelegate
 
-    private let updaterController = SPUStandardUpdaterController(
-        startingUpdater: true,
-        updaterDelegate: nil,
-        userDriverDelegate: nil
-    )
+    private let updaterController: SPUStandardUpdaterController = {
+        #if DEBUG
+        let startingUpdater = false
+        #else
+        let startingUpdater = true
+        #endif
+        return SPUStandardUpdaterController(
+            startingUpdater: startingUpdater,
+            updaterDelegate: nil,
+            userDriverDelegate: nil
+        )
+    }()
 
     init() {
         AppDesign.apply()
