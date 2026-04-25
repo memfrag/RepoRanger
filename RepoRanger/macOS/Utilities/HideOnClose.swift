@@ -9,6 +9,8 @@ import AppKit
 /// so the window can be reopened from the dock or a hotkey.
 struct HideOnClose: NSViewRepresentable {
 
+    static weak var registeredWindow: NSWindow?
+
     private class HideTarget: NSObject {
         @objc func hideWindow(_ sender: Any?) {
             guard let button = sender as? NSButton else { return }
@@ -22,6 +24,7 @@ struct HideOnClose: NSViewRepresentable {
         let view = NSView()
         DispatchQueue.main.async {
             guard let window = view.window else { return }
+            Self.registeredWindow = window
             window.standardWindowButton(.closeButton)?.target = Self.hideTarget
             window.standardWindowButton(.closeButton)?.action = #selector(HideTarget.hideWindow(_:))
         }
