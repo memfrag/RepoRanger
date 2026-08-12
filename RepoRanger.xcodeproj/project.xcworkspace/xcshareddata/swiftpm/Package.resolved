@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apparata/MarkdownUI",
       "state" : {
-        "revision" : "24aba571e7e18914399cb0d7645631c85f78e0b3",
-        "version" : "1.0.2"
+        "revision" : "b89150eb44c8e9eea4e206a1787944750a696988",
+        "version" : "1.0.3"
       }
     },
     {
