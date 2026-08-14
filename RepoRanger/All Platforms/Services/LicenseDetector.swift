@@ -89,8 +89,6 @@ enum LicenseDetector {
 
     // MARK: - License templates
 
-    // swiftlint:disable line_length
-
     private static let templates: [(identifier: String, body: String)] = [
         ("MIT", normalize("""
         Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -200,6 +198,4 @@ enum LicenseDetector {
         3. This notice may not be removed or altered from any source distribution.
         """)),
     ]
-
-    // swiftlint:enable line_length
 }

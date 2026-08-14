@@ -11,7 +11,6 @@ import Sparkle
 @main
 struct MacApp: App {
 
-    // swiftlint:disable:next weak_delegate
     @NSApplicationDelegateAdaptor(MacAppDelegate.self) var appDelegate
 
     private let updaterController: SPUStandardUpdaterController = {

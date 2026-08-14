@@ -4,25 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-RepoRanger is a native macOS app (SwiftUI) that scans directories for Xcode projects and Swift packages, displaying them in a three-column NavigationSplitView with README preview. Built by Apparata AB.
+RepoRanger is a native macOS app (SwiftUI) that scans directories for Xcode projects, Swift packages, and git repositories, displaying them in a three-column NavigationSplitView with README preview. Built by Apparata AB.
 
-## Build & Lint
+## Build
 
-The Xcode project is generated from `XcodeProject.yml` using XcodeGen:
-```
-xcodegen generate
-```
+`RepoRanger.xcodeproj` is checked into the repository and edited directly. There is no XcodeGen step — do not look for an `XcodeProject.yml`, and edit the project through Xcode or by modifying `project.pbxproj`.
 
 Build from Xcode using the **RepoRanger (Debug)** or **RepoRanger (Release)** scheme, or from the command line:
 ```
 xcodebuild -project RepoRanger.xcodeproj -scheme "RepoRanger (Debug)" build
 ```
 
-SwiftLint runs automatically as a post-compile build phase via Mint (pinned in `Mintfile` to `realm/SwiftLint@0.49.1`). The config is in `.swiftlint.yml` and uses an `only_rules` whitelist with 54 rules. Notable custom rules enforce `setUp`/`shutDown`/`logIn`/`logOut` naming (not `setup`/`shutdown`/`login`/`logout`) and discourage using `vc` as a variable name.
+**There is no linter in this project, by choice.** SwiftLint was removed deliberately — don't reintroduce it, and don't add `swiftlint:disable` comments. `xcodebuild` is the only automated check, so never describe a change as "lint clean"; say what actually ran.
 
-Release builds (archive, sign, notarize, package): `./scripts/build-and-notarize.sh`
+Match the style of the surrounding code instead. Existing conventions worth preserving: `setUp`/`shutDown`/`logIn`/`logOut` rather than `setup`/`shutdown`/`login`/`logout`, and no `vc` as a variable name.
 
-There are no test targets in this project.
+Release builds (archive, sign, notarize, package, publish): `./scripts/build-and-notarize.sh`. This is a single interactive pipeline that goes all the way to production — it prompts for a version number and release title, then bumps `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` in `project.pbxproj` via `sed`, commits and **pushes to origin/main**, archives and notarizes, creates and pushes a git tag, publishes a GitHub release with the DMG, and finally regenerates and pushes `appcast.xml`. That last step is what ships the update to existing users over Sparkle. There is no dry-run and no confirmation between steps, so inspect the build before starting the script, not during. It requires a keychain profile named `notary` and the `gh` CLI.
+
+The project has a single target, `RepoRanger`, and no test targets.
 
 ## Key Architecture
 
@@ -36,7 +35,7 @@ There are no test targets in this project.
 
 ### Settings
 
-`AppSettings` is an `@Observable` class backed by `KeyValueStore` (UserDefaults). Keys: `colorScheme`, `monitoredDirectories`, `sidebarSections`, `favoriteProjectPaths`, `projectSortOrder`. Mock variant uses an in-memory store.
+`AppSettings` is an `@Observable` class backed by `KeyValueStore` (UserDefaults). Keys: `colorScheme`, `monitoredDirectories`, `sidebarSections`, `favoriteProjectPaths`, `projectSortOrder`, `recentProjectPaths`, `gitClientPath`, `hotkeyKeyCode`, `hotkeyModifiers`, `projectTags`, `availableTags`, and `collections`. Mock variant uses an in-memory store.
 
 ### Directory Scanning
 
@@ -54,4 +53,4 @@ A directory containing a `.git` entry is only reported as a `.gitRepository` if 
 
 ### Dependencies
 
-All remote packages are from the `apparata` GitHub org. See `XcodeProject.yml` for the full list with pinned versions.
+Remote packages are Swift Package Manager dependencies declared in the Xcode project itself (`XCRemoteSwiftPackageReference` entries in `project.pbxproj`) — there is no manifest file listing them. 19 are from the `apparata` GitHub org; the two exceptions are `soffes/HotKey` and `sparkle-project/Sparkle`. `Packages/AppDesign` is a local package referenced by path.
