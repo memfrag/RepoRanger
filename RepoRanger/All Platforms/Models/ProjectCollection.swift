@@ -56,12 +56,14 @@ struct ProjectCollection: Codable, Identifiable, Hashable {
         case all
         case xcodeOnly
         case swiftPackageOnly
+        case gitRepositoryOnly
 
         var displayName: String {
             switch self {
             case .all: "All"
             case .xcodeOnly: "Xcode Projects Only"
             case .swiftPackageOnly: "Swift Packages Only"
+            case .gitRepositoryOnly: "Git Repositories Only"
             }
         }
     }

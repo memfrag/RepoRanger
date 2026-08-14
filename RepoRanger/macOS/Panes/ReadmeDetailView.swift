@@ -169,20 +169,22 @@ struct ReadmeDetailView: View {
                 }
             }
             .sharedBackgroundVisibility(.hidden)
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    openInXcode()
-                } label: {
-                    Label {
-                        Text("Open in Xcode")
-                    } icon: {
-                        Image(.xcode32)
-                            .resizable()
-                            .frame(width: 24, height: 24)
+            if project.canOpenInXcode {
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        openInXcode()
+                    } label: {
+                        Label {
+                            Text("Open in Xcode")
+                        } icon: {
+                            Image(.xcode32)
+                                .resizable()
+                                .frame(width: 24, height: 24)
+                        }
                     }
                 }
+                .sharedBackgroundVisibility(.hidden)
             }
-            .sharedBackgroundVisibility(.hidden)
         }
         .task(id: project.id) {
             async let readmeTask: Void = loadReadme()
@@ -227,10 +229,7 @@ struct ReadmeDetailView: View {
     }
 
     private func browseOnGitHub() {
-        let directory = switch project.kind {
-        case .xcodeProject: project.url.deletingLastPathComponent()
-        case .swiftPackage: project.url
-        }
+        let directory = project.directory
         let configURL = directory.appendingPathComponent(".git/config")
         guard let contents = try? String(contentsOf: configURL, encoding: .utf8) else { return }
         var inOrigin = false
@@ -265,10 +264,7 @@ struct ReadmeDetailView: View {
     }
 
     private func openInTerminal() {
-        let directory = switch project.kind {
-        case .xcodeProject: project.url.deletingLastPathComponent()
-        case .swiftPackage: project.url
-        }
+        let directory = project.directory
         NSWorkspace.shared.open(
             [directory],
             withApplicationAt: URL(filePath: "/System/Applications/Utilities/Terminal.app"),
@@ -277,18 +273,12 @@ struct ReadmeDetailView: View {
     }
 
     private func revealInFinder() {
-        let directory = switch project.kind {
-        case .xcodeProject: project.url.deletingLastPathComponent()
-        case .swiftPackage: project.url
-        }
+        let directory = project.directory
         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path(percentEncoded: false))
     }
 
     private func openInGitClient() {
-        let directory = switch project.kind {
-        case .xcodeProject: project.url.deletingLastPathComponent()
-        case .swiftPackage: project.url
-        }
+        let directory = project.directory
         let process = Process()
         process.executableURL = URL(filePath: "/usr/bin/env")
         process.arguments = [settings.gitClientPath, directory.path(percentEncoded: false)]

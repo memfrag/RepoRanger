@@ -240,8 +240,8 @@ struct CommandKBar: View {
                         .fill(.blue)
                 )
 
-        case .swiftPackage:
-            Image(systemName: "shippingbox.fill")
+        case .swiftPackage, .gitRepository:
+            Image(systemName: project.systemImage)
                 .foregroundStyle(project.iconColor)
         }
     }
@@ -282,10 +282,7 @@ struct CommandKBar: View {
         guard filteredProjects.indices.contains(selectedIndex) else { return }
         let project = filteredProjects[selectedIndex].project
         settings.recordRecentProject(project.stablePath)
-        let directory = switch project.kind {
-        case .xcodeProject: project.url.deletingLastPathComponent()
-        case .swiftPackage: project.url
-        }
+        let directory = project.directory
         let process = Process()
         process.executableURL = URL(filePath: "/usr/bin/env")
         process.arguments = [settings.gitClientPath, directory.path(percentEncoded: false)]

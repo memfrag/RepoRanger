@@ -13,6 +13,7 @@ struct ProjectListView: View {
 
     @State private var isXcodeProjectsExpanded = true
     @State private var isSwiftPackagesExpanded = true
+    @State private var isGitRepositoriesExpanded = true
     @State private var searchText = ""
     @State private var activeTagFilters: Set<String> = []
     @State private var isShowingNewTagAlert = false
@@ -54,6 +55,7 @@ struct ProjectListView: View {
                     List(selection: $selection) {
                         let xcodeProjects = filteredProjects.filter { $0.kind == .xcodeProject }
                         let swiftPackages = filteredProjects.filter { $0.kind == .swiftPackage }
+                        let gitRepositories = filteredProjects.filter { $0.kind == .gitRepository }
 
                         if !xcodeProjects.isEmpty {
                             Section("Xcode Projects", isExpanded: $isXcodeProjectsExpanded) {
@@ -66,6 +68,14 @@ struct ProjectListView: View {
                         if !swiftPackages.isEmpty {
                             Section("Swift Packages", isExpanded: $isSwiftPackagesExpanded) {
                                 ForEach(swiftPackages) { project in
+                                    projectRow(project)
+                                }
+                            }
+                        }
+
+                        if !gitRepositories.isEmpty {
+                            Section("Git Repositories", isExpanded: $isGitRepositoriesExpanded) {
+                                ForEach(gitRepositories) { project in
                                     projectRow(project)
                                 }
                             }
@@ -212,10 +222,7 @@ struct ProjectListView: View {
     }
 
     private func lastModifiedDate(for project: DiscoveredProject) -> Date? {
-        let directory = switch project.kind {
-        case .xcodeProject: project.url.deletingLastPathComponent()
-        case .swiftPackage: project.url
-        }
+        let directory = project.directory
         return try? FileManager.default
             .attributesOfItem(atPath: directory.path(percentEncoded: false))[.modificationDate] as? Date
     }
@@ -233,8 +240,8 @@ struct ProjectListView: View {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(selected ? .white.opacity(0.3) : .blue)
                 )
-        case .swiftPackage:
-            Image(systemName: "shippingbox.fill")
+        case .swiftPackage, .gitRepository:
+            Image(systemName: project.systemImage)
                 .foregroundStyle(selected ? .white : project.iconColor)
         }
     }
@@ -252,14 +259,13 @@ struct ProjectListView: View {
         }
         Divider()
         Button("Reveal in Finder", systemImage: "folder") {
-            let directory = switch project.kind {
-            case .xcodeProject: project.url.deletingLastPathComponent()
-            case .swiftPackage: project.url
-            }
+            let directory = project.directory
             NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path(percentEncoded: false))
         }
-        Button("Open in Xcode", systemImage: "hammer") {
-            project.openInXcode()
+        if project.canOpenInXcode {
+            Button("Open in Xcode", systemImage: "hammer") {
+                project.openInXcode()
+            }
         }
         Divider()
         Menu("Tags") {
@@ -283,10 +289,7 @@ struct ProjectListView: View {
         }
         Divider()
         Button("Copy Path", systemImage: "doc.on.doc") {
-            let directory = switch project.kind {
-            case .xcodeProject: project.url.deletingLastPathComponent()
-            case .swiftPackage: project.url
-            }
+            let directory = project.directory
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(directory.path(percentEncoded: false), forType: .string)
         }

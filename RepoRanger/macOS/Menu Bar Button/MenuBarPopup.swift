@@ -51,7 +51,21 @@ private struct FavoriteRow: View {
     }
 
     private var isXcodeProject: Bool {
-        URL(filePath: path).pathExtension == "xcodeproj"
+        kind == .xcodeProject
+    }
+
+    /// Favorites are stored as plain paths, so the kind is inferred from what
+    /// is actually on disk.
+    private var kind: ProjectKind {
+        let url = URL(filePath: path)
+        if url.pathExtension == "xcodeproj" {
+            return .xcodeProject
+        }
+        let packageURL = url.appendingPathComponent("Package.swift")
+        if FileManager.default.fileExists(atPath: packageURL.path(percentEncoded: false)) {
+            return .swiftPackage
+        }
+        return .gitRepository
     }
 
     var body: some View {
@@ -60,7 +74,8 @@ private struct FavoriteRow: View {
         } label: {
             HStack(spacing: 6) {
                 Group {
-                    if isXcodeProject {
+                    switch kind {
+                    case .xcodeProject:
                         Image(systemName: "hammer.fill")
                             .font(.system(size: 7))
                             .foregroundStyle(.white)
@@ -70,9 +85,12 @@ private struct FavoriteRow: View {
                                 RoundedRectangle(cornerRadius: 3)
                                     .fill(.blue)
                             )
-                    } else {
+                    case .swiftPackage:
                         Image(systemName: "shippingbox.fill")
                             .foregroundStyle(Color(red: 0xCA / 255.0, green: 0xA5 / 255.0, blue: 0x7C / 255.0))
+                    case .gitRepository:
+                        Image(systemName: "arrow.triangle.branch")
+                            .foregroundStyle(Color(red: 0xF0 / 255.0, green: 0x50 / 255.0, blue: 0x33 / 255.0))
                     }
                 }
                 Text(name)
@@ -103,11 +121,14 @@ private struct FavoriteRow: View {
     }
 
     private func openInXcode() {
-        let url: URL
-        if isXcodeProject {
-            url = URL(filePath: path)
-        } else {
-            url = URL(filePath: path).appendingPathComponent("Package.swift")
+        let url: URL? = switch kind {
+        case .xcodeProject: URL(filePath: path)
+        case .swiftPackage: URL(filePath: path).appendingPathComponent("Package.swift")
+        case .gitRepository: nil
+        }
+        guard let url else {
+            revealInFinder()
+            return
         }
         let xcodeURL = URL(filePath: "/Applications/Xcode.app")
         NSWorkspace.shared.open([url], withApplicationAt: xcodeURL, configuration: NSWorkspace.OpenConfiguration())

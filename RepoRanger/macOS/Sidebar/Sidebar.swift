@@ -248,6 +248,7 @@ struct Sidebar: View {
         case .all: break
         case .xcodeOnly: projects = projects.filter { $0.kind == .xcodeProject }
         case .swiftPackageOnly: projects = projects.filter { $0.kind == .swiftPackage }
+        case .gitRepositoryOnly: projects = projects.filter { $0.kind == .gitRepository }
         }
 
         // Filter by tags (AND logic)
@@ -292,10 +293,7 @@ struct Sidebar: View {
     }
 
     private func lastModifiedDate(for project: DiscoveredProject) -> Date? {
-        let directory = switch project.kind {
-        case .xcodeProject: project.url.deletingLastPathComponent()
-        case .swiftPackage: project.url
-        }
+        let directory = project.directory
         return try? FileManager.default
             .attributesOfItem(atPath: directory.path(percentEncoded: false))[.modificationDate] as? Date
     }

@@ -186,8 +186,8 @@ struct DirectoryListView: View {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(.blue)
                 )
-        case .swiftPackage:
-            Image(systemName: "shippingbox.fill")
+        case .swiftPackage, .gitRepository:
+            Image(systemName: project.systemImage)
                 .foregroundStyle(project.iconColor)
         }
     }
@@ -234,14 +234,13 @@ struct DirectoryListView: View {
             }
             Divider()
             Button("Reveal in Finder", systemImage: "folder") {
-                let directory = switch project.kind {
-                case .xcodeProject: project.url.deletingLastPathComponent()
-                case .swiftPackage: project.url
-                }
+                let directory = project.directory
                 NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: directory.path(percentEncoded: false))
             }
-            Button("Open in Xcode", systemImage: "hammer") {
-                project.openInXcode()
+            if project.canOpenInXcode {
+                Button("Open in Xcode", systemImage: "hammer") {
+                    project.openInXcode()
+                }
             }
         }
     }

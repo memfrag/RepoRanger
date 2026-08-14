@@ -40,7 +40,9 @@ There are no test targets in this project.
 
 ### Directory Scanning
 
-`DirectoryScanner` recursively enumerates a directory for `.xcodeproj` bundles and `Package.swift` files. It skips nested content under discovered Xcode projects and filters out sub-packages that live inside an Xcode project directory. Results are `DiscoveredProject` values with kind (`.xcodeProject` / `.swiftPackage`), URL, and optional README URL.
+`DirectoryScanner` recursively enumerates a directory for `.xcodeproj` bundles, `Package.swift` files, and git repositories. It skips nested content under discovered Xcode projects and filters out sub-packages that live inside an Xcode project directory. Results are `DiscoveredProject` values with kind (`.xcodeProject` / `.swiftPackage` / `.gitRepository`), URL, and optional README URL.
+
+A directory containing a `.git` entry is only reported as a `.gitRepository` if no Xcode project or Swift package was discovered anywhere inside it — so a repo built around an `.xcodeproj` still lists as an Xcode project. Nested repositories (submodules, vendored clones) are not listed separately from their outermost repo. `DiscoveredProject.directory` gives the containing directory for any kind, and `canOpenInXcode` is false for plain git repos.
 
 `MonitoredDirectory` uses security-scoped bookmarks to persist sandbox access to user-selected folders.
 

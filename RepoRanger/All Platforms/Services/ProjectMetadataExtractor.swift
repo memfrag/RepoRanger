@@ -19,10 +19,7 @@ enum ProjectMetadataExtractor {
             }
         }
 
-        let projectDirectory: URL = switch project.kind {
-        case .xcodeProject: project.url.deletingLastPathComponent()
-        case .swiftPackage: project.url
-        }
+        let projectDirectory = project.directory
         hasUncommittedChanges = await checkGitStatus(in: projectDirectory)
         let license = LicenseDetector.detect(in: projectDirectory)?.identifier
 
